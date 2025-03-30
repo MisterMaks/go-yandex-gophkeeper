@@ -1,0 +1,11 @@
+# IDEs directories
+.idea
+.vscode
+
+.DS_Store
+
+*.out
+
+bin/
+
+local_config.json
