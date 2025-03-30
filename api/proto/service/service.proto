@@ -20,11 +20,13 @@ service GoYandexGophkeeper {
 message RegisterRequest {
   string login = 1;
   string password = 2;
+  bytes public_key = 3;
+  bytes private_key_cipher = 4;
 }
 
 message RegisterResponse {
-  string private_key_hash = 1;
-  string public_key = 2;
+  bytes public_key = 1;
+  bytes private_key_cipher = 2;
 }
 
 message LoginRequest {
@@ -33,8 +35,8 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  string private_key_hash = 1;
-  string public_key = 2;
+  bytes public_key = 1;
+  bytes private_key_cipher = 2;
 }
 
 enum Type {

@@ -3,9 +3,9 @@
 CREATE TABLE "user" (
     id serial PRIMARY KEY,
     login varchar(64) UNIQUE NOT NULL CHECK (login SIMILAR TO '[\w\.\-]+'),
-    password_hash varchar(256) NOT NULL CHECK (password_hash SIMILAR TO '[\w\.\-]+'),
-    public_key text NOT NULL,
-    private_key_hash text NOT NULL,
+    password_hash bytea NOT NULL,
+    public_key bytea NOT NULL,
+    private_key_cipher bytea NOT NULL,
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp NOT NULL DEFAULT now()
 );

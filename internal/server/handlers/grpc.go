@@ -29,7 +29,7 @@ const (
 
 // UsecaseInterface contains the necessary functions for the business logic of app.
 type UsecaseInterface interface {
-	Register(ctx context.Context, login, password string) (*domain.User, error)
+	Register(ctx context.Context, login, password string, publicKey, privateKeyCipher []byte) (*domain.User, error)
 	Login(ctx context.Context, login, password string) (*domain.User, error)
 
 	CreateData(ctx context.Context, userID string, name string, dataType string, data []byte) (*domain.Data, error)
@@ -73,7 +73,7 @@ func (h *GRPCHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 
 	handlerLogger.Info("Register user")
 
-	user, err := h.usecase.Register(ctx, in.Login, in.Password)
+	user, err := h.usecase.Register(ctx, in.Login, in.Password, in.PublicKey, in.PrivateKeyCipher)
 	if err != nil {
 		handlerLogger.Error("Failed to register user",
 			zap.Error(err),
@@ -82,8 +82,8 @@ func (h *GRPCHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 	}
 
 	return &pb.RegisterResponse{
-		PublicKey:      user.PublicKey,
-		PrivateKeyHash: user.PrivateKeyHash,
+		PublicKey:        user.PublicKey,
+		PrivateKeyCipher: user.PrivateKeyCipher,
 	}, nil
 }
 
@@ -102,8 +102,8 @@ func (h *GRPCHandler) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Login
 	}
 
 	return &pb.LoginResponse{
-		PublicKey:      user.PublicKey,
-		PrivateKeyHash: user.PrivateKeyHash,
+		PublicKey:        user.PublicKey,
+		PrivateKeyCipher: user.PrivateKeyCipher,
 	}, nil
 }
 
