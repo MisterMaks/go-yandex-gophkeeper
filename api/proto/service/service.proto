@@ -1,242 +1,110 @@
 syntax = "proto3";
 
-package service;
+package service_2;
 
-option go_package = "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service";
+option go_package = "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service_2";
 
 service GoYandexGophkeeper {
-	rpc Register(RegisterRequest) returns (RegisterResponse);
-	rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
 
-	rpc CreateLoginPassword(CreateLoginPasswordRequest) returns (CreateLoginPasswordResponse);
-	rpc GetLoginPasswordBatch(GetLoginPasswordBatchRequest) returns (GetLoginPasswordBatchResponse);
-	rpc UpdateLoginPassword(UpdateLoginPasswordRequest) returns (UpdateLoginPasswordResponse);
-	rpc DeleteLoginPassword(DeleteLoginPasswordRequest) returns (DeleteLoginPasswordResponse);
-
-	rpc CreateBankCard(CreateBankCardRequest) returns (CreateBankCardResponse);
-	rpc GetBankCardBatch(GetBankCardBatchRequest) returns (GetBankCardBatchResponse);
-	rpc UpdateBankCard(UpdateBankCardRequest) returns (UpdateBankCardResponse);
-	rpc DeleteBankCard(DeleteBankCardRequest) returns (DeleteBankCardResponse);
-
-	rpc CreateTextMeta(CreateTextMetaRequest) returns (CreateTextMetaResponse);
-	rpc CreateText(stream CreateTextRequest) returns (CreateTextResponse);
-	rpc GetTextMetaBatch(GetTextMetaBatchRequest) returns (GetTextMetaBatchResponse);
-	rpc GetText(GetTextRequest) returns (stream GetTextResponse);
-	rpc UpdateTextMeta(UpdateTextMetaRequest) returns (UpdateTextMetaResponse);
-	rpc UpdateText(stream UpdateTextRequest) returns (UpdateTextResponse);
-	rpc DeleteText(DeleteTextRequest) returns (DeleteTextResponse);
-
-	rpc CreateBinaryDataMeta(CreateBinaryDataMetaRequest) returns (CreateBinaryDataMetaResponse);
-	rpc CreateBinaryData(stream CreateBinaryDataRequest) returns (CreateBinaryDataResponse);
-	rpc GetBinaryDataMetaBatch(GetBinaryDataMetaBatchRequest) returns (GetBinaryDataMetaBatchResponse);
-	rpc GetBinaryData(GetBinaryDataRequest) returns (stream GetBinaryDataResponse);
-	rpc UpdateBinaryDataMeta(stream UpdateBinaryDataMetaRequest) returns (UpdateBinaryDataMetaResponse);
-	rpc UpdateBinaryData(stream UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);
-	rpc DeleteBinaryData(DeleteBinaryDataRequest) returns (DeleteBinaryDataResponse);
+  rpc CreateData(CreateDataRequest) returns (CreateDataResponse);
+  rpc GetDataBatch(GetDataBatchRequest) returns (GetDataBatchResponse);
+  rpc UpdateData(UpdateDataRequest) returns (UpdateDataResponse);
+  rpc DeleteData(DeleteDataRequest) returns (DeleteDataResponse);
+  rpc CreateDataChunk(stream CreateDataChunkRequest) returns (CreateDataChunkResponse);
+  rpc GetDataChunk(GetDataChunkRequest) returns (stream GetDataChunkResponse);
+  rpc UpdateDataChunk(stream UpdateDataChunkRequest) returns (UpdateDataChunkResponse);
 }
 
 message RegisterRequest {
-	string login = 1;
-	string password = 2;
+  string login = 1;
+  string password = 2;
 }
 
 message RegisterResponse {
-	string private_key_hash = 1;
-	string public_key = 2;
+  string private_key_hash = 1;
+  string public_key = 2;
 }
 
 message LoginRequest {
-	string login = 1;
-	string password = 2;
+  string login = 1;
+  string password = 2;
 }
 
 message LoginResponse {
-	string private_key_hash = 1;
-	string public_key = 2;
+  string private_key_hash = 1;
+  string public_key = 2;
 }
 
-message CreateLoginPasswordRequest {
-	string name = 1;
-	string login_cipher = 2;
-	string password_cipher = 3;
+enum Type {
+  LOGIN_PASSWORD = 0;
+  BANK_CARD = 1;
+  TEXT = 2;
+  BINARY = 3;
 }
 
-message CreateLoginPasswordResponse {}
-
-message GetLoginPasswordBatchRequest {}
-
-message GetLoginPasswordBatchResponse {
-	message LoginPassword {
-		string id = 1;
-		string name = 2;
-		string login_cipher = 3;
-		string password_cipher = 4;
-	}
-
-	repeated LoginPassword login_password_batch = 1;
+message CreateDataRequest {
+  string name = 1;
+  Type type = 2;
+  bytes data = 3;
 }
 
-message UpdateLoginPasswordRequest {
-	string id = 1;
-	string name = 2;
-	string login_cipher = 3;
-	string password_cipher = 4;
+message CreateDataResponse {
+  string id = 1;
 }
 
-message UpdateLoginPasswordResponse {}
-
-message DeleteLoginPasswordRequest {
-	string id = 1;
+message GetDataBatchRequest {
+  repeated Type types = 1;
 }
 
-message DeleteLoginPasswordResponse {}
+message GetDataBatchResponse {
+  message Data {
+    string id = 1;
+    string name = 2;
+    Type type = 3;
+    bytes data = 4;
+    bool is_chunked = 5;
+  }
 
-message CreateBankCardRequest {
-	string name = 1;
-	string number_cipher = 2;
-	string expiration_date_cipher = 3;
-	string security_code_cipher = 4;
+  repeated Data data_batch = 1;
 }
 
-message CreateBankCardResponse {}
-
-message GetBankCardBatchRequest {}
-
-message GetBankCardBatchResponse {
-	message BankCard {
-		string id = 1;
-		string name = 2;
-		string number_cipher = 3;
-		string expiration_date_cipher = 4;
-		string security_code_cipher = 5;
-	}
-
-	repeated BankCard bank_card_batch = 1;
+message UpdateDataRequest {
+  string id = 1;
+  string name = 2;
+  Type type = 3;
+  bytes data = 4;
 }
 
-message UpdateBankCardRequest {
-	string id = 1;
-	string name = 2;
-	string number_cipher = 3;
-	string expiration_date_cipher = 4;
-	string security_code_cipher = 5;
+message UpdateDataResponse {}
+
+message DeleteDataRequest {
+  string id = 1;
 }
 
-message UpdateBankCardResponse {}
+message DeleteDataResponse {}
 
-message DeleteBankCardRequest {
-	string id = 1;
+message CreateDataChunkRequest {
+  string id = 1;
+  bytes data_chunk = 2;
+  bool is_last = 3;
 }
 
-message DeleteBankCardResponse {}
+message CreateDataChunkResponse {}
 
-message CreateTextMetaRequest {
-	string name = 1;
+message GetDataChunkRequest {
+  string id = 1;
 }
 
-message CreateTextMetaResponse {
-	string id = 1;
+message GetDataChunkResponse {
+  bytes data_chunk = 1;
 }
 
-message CreateTextRequest {
-	string id = 1;
-	string text_chunk = 2;
-	optional bool is_finished = 3;
+message UpdateDataChunkRequest {
+  string id = 1;
+  bytes data_chunk = 2;
+  bool is_last = 3;
 }
 
-message CreateTextResponse {}
-
-message GetTextMetaBatchRequest {}
-
-message GetTextMetaBatchResponse {
-	message TextMeta {
-		string id = 1;
-		string name = 2;
-		string text_prefix = 3;
-	}
-
-	repeated TextMeta text_meta_batch = 1;
-}
-
-message GetTextRequest {
-	string id = 1;
-}
-
-message GetTextResponse {
-	string text_chunk = 1;
-}
-
-message UpdateTextMetaRequest {
-	string id = 1;
-	string name = 2;
-}
-
-message UpdateTextMetaResponse {}
-
-message UpdateTextRequest {
-	string id = 1;
-	string text_chunk = 2;
-	optional bool is_finished = 3;
-}
-
-message UpdateTextResponse {}
-
-message DeleteTextRequest {
-	string id = 1;
-}
-
-message DeleteTextResponse {}
-
-message CreateBinaryDataMetaRequest {
-	string name = 1;
-}
-
-message CreateBinaryDataMetaResponse {
-	string id = 1;
-}
-
-message CreateBinaryDataRequest {
-	string id = 1;
-	bytes binary_data_chunk = 2;
-}
-
-message CreateBinaryDataResponse {}
-
-message GetBinaryDataMetaBatchRequest {}
-
-message GetBinaryDataMetaBatchResponse {
-	message BinaryDataMeta {
-		string id = 1;
-		string name = 2;
-	}
-
-	repeated BinaryDataMeta binary_data_meta_batch = 1;
-}
-
-message GetBinaryDataRequest {
-	string id = 1;
-}
-
-message GetBinaryDataResponse {
-	bytes binary_data_chunk = 1;
-}
-
-message UpdateBinaryDataMetaRequest {
-	string id = 1;
-	string name = 2;
-}
-
-message UpdateBinaryDataMetaResponse {}
-
-message UpdateBinaryDataRequest {
-	string id = 1;
-	bytes binary_data_chunk = 2;
-}
-
-message UpdateBinaryDataResponse {}
-
-message DeleteBinaryDataRequest {
-	string id = 1;
-}
-
-message DeleteBinaryDataResponse {}
+message UpdateDataChunkResponse {}

@@ -32,23 +32,13 @@ type UsecaseInterface interface {
 	Register(ctx context.Context, login, password string) (*domain.User, error)
 	Login(ctx context.Context, login, password string) (*domain.User, error)
 
-	CreateLoginPassword(ctx context.Context, userID string, name, loginCipher, passwordCipher string) (*domain.LoginPassword, error)
-	GetLoginPasswordBatch(ctx context.Context, userID string) ([]*domain.LoginPassword, error)
-	UpdateLoginPassword(ctx context.Context, userID string, id string, name, loginCipher, passwordCipher string) (*domain.LoginPassword, error)
-	DeleteLoginPassword(ctx context.Context, userID string, id string) (*domain.LoginPassword, error)
-
-	CreateBankCard(ctx context.Context, userID string, name, numberCipher, expirationDateCipher, securityCodeCipher string) (*domain.BankCard, error)
-	GetBankCardBatch(ctx context.Context, userID string) ([]*domain.BankCard, error)
-	UpdateBankCard(ctx context.Context, userID string, id string, name, numberCipher, expirationDateCipher, securityCodeCipher string) (*domain.BankCard, error)
-	DeleteBankCard(ctx context.Context, userID string, id string) (*domain.BankCard, error)
-
-	CreateTextMeta(ctx context.Context, userID string, name string) (string, error)
-	CreateText(ctx context.Context, userID string, id string, chunk string) error
-	SetTextStatus(ctx context.Context, userID string, id string, status string) error
-	GetTextMetaBatch(ctx context.Context, userID string) ([]*domain.TextMeta, error)
-	GetText(ctx context.Context, userID string, id string) (string, error)
-	UpdateTextMeta(ctx context.Context, userID string, id string, name string) error
-	DeleteText(ctx context.Context, userID string, id string) (*domain.TextMeta, error)
+	CreateData(ctx context.Context, userID string, name string, dataType string, data []byte) (*domain.Data, error)
+	CreateDataChunk(ctx context.Context, userID string, id string, chunk []byte) error
+	SetDataStatus(ctx context.Context, userID string, id string, status string) error
+	GetDataBatch(ctx context.Context, userID string, dataTypes []string) ([]*domain.Data, error)
+	GetDataChunk(ctx context.Context, userID string, id string) ([]byte, error)
+	UpdateData(ctx context.Context, userID string, id string, name string, dataType string, data []byte) (*domain.Data, error)
+	DeleteData(ctx context.Context, userID string, id string) (*domain.Data, error)
 }
 
 // GRPCHandler handlers struct.
@@ -117,11 +107,11 @@ func (h *GRPCHandler) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Login
 	}, nil
 }
 
-// CreateLoginPassword creates login/password.
-func (h *GRPCHandler) CreateLoginPassword(ctx context.Context, in *pb.CreateLoginPasswordRequest) (*pb.CreateLoginPasswordResponse, error) {
+// CreateData creates data.
+func (h *GRPCHandler) CreateData(ctx context.Context, in *pb.CreateDataRequest) (*pb.CreateDataResponse, error) {
 	handlerLogger := logger.GetContextLogger(ctx)
 
-	handlerLogger.Info("Create login/password")
+	handlerLogger.Info("Create data")
 
 	userID, err := getContextUserID(ctx)
 	if err != nil {
@@ -131,28 +121,28 @@ func (h *GRPCHandler) CreateLoginPassword(ctx context.Context, in *pb.CreateLogi
 		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
 	}
 
-	_, err = h.usecase.CreateLoginPassword(
+	data, err := h.usecase.CreateData(
 		ctx,
 		userID,
 		in.Name,
-		in.LoginCipher,
-		in.PasswordCipher,
+		in.Type,
+		in.Data,
 	)
 	if err != nil {
-		handlerLogger.Error("Failed to create login/password",
+		handlerLogger.Error("Failed to create data",
 			zap.Error(err),
 		)
 		return nil, status.Error(codes.Internal, InternalErrorMessage)
 	}
 
-	return &pb.CreateLoginPasswordResponse{}, nil
+	return &pb.CreateDataResponse{Id: data.ID}, nil
 }
 
-// GetLoginPasswordBatch gets login/password batch.
-func (h *GRPCHandler) GetLoginPasswordBatch(ctx context.Context, _ *pb.GetLoginPasswordBatchRequest) (*pb.GetLoginPasswordBatchResponse, error) {
+// GetDataBatch gets data batch.
+func (h *GRPCHandler) GetDataBatch(ctx context.Context, in *pb.GetDataBatchRequest) (*pb.GetDataBatchResponse, error) {
 	handlerLogger := logger.GetContextLogger(ctx)
 
-	handlerLogger.Info("Get login/password batch")
+	handlerLogger.Info("Get data batch")
 
 	userID, err := getContextUserID(ctx)
 	if err != nil {
@@ -162,9 +152,10 @@ func (h *GRPCHandler) GetLoginPasswordBatch(ctx context.Context, _ *pb.GetLoginP
 		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
 	}
 
-	batch, err := h.usecase.GetLoginPasswordBatch(
+	batch, err := h.usecase.GetDataBatch(
 		ctx,
 		userID,
+		in.Types,
 	)
 	if err != nil {
 		handlerLogger.Error("Failed to get login/password batch",
@@ -173,21 +164,21 @@ func (h *GRPCHandler) GetLoginPasswordBatch(ctx context.Context, _ *pb.GetLoginP
 		return nil, status.Error(codes.Internal, InternalErrorMessage)
 	}
 
-	serializedBatch := make([]*pb.GetLoginPasswordBatchResponse_LoginPassword, len(batch))
+	serializedBatch := make([]*pb.GetDataBatchResponse_Data, len(batch))
 	for i, loginPassword := range batch {
 		serializedBatch[i] = loginPassword.SerializeToProtobuf()
 	}
 
-	return &pb.GetLoginPasswordBatchResponse{
-		LoginPasswordBatch: serializedBatch,
+	return &pb.GetDataBatchResponse{
+		DataBatch: serializedBatch,
 	}, nil
 }
 
-// UpdateLoginPassword updates login/password.
-func (h *GRPCHandler) UpdateLoginPassword(ctx context.Context, in *pb.UpdateLoginPasswordRequest) (*pb.UpdateLoginPasswordResponse, error) {
+// UpdateData updates data.
+func (h *GRPCHandler) UpdateData(ctx context.Context, in *pb.UpdateDataRequest) (*pb.UpdateDataResponse, error) {
 	handlerLogger := logger.GetContextLogger(ctx)
 
-	handlerLogger.Info("Update login/password")
+	handlerLogger.Info("Update data")
 
 	userID, err := getContextUserID(ctx)
 	if err != nil {
@@ -197,29 +188,29 @@ func (h *GRPCHandler) UpdateLoginPassword(ctx context.Context, in *pb.UpdateLogi
 		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
 	}
 
-	_, err = h.usecase.UpdateLoginPassword(
+	_, err = h.usecase.UpdateData(
 		ctx,
 		userID,
 		in.Id,
 		in.Name,
-		in.LoginCipher,
-		in.PasswordCipher,
+		in.Type,
+		in.Data,
 	)
 	if err != nil {
-		handlerLogger.Error("Failed to update login/password",
+		handlerLogger.Error("Failed to update data",
 			zap.Error(err),
 		)
 		return nil, status.Error(codes.Internal, InternalErrorMessage)
 	}
 
-	return &pb.UpdateLoginPasswordResponse{}, nil
+	return &pb.UpdateDataResponse{}, nil
 }
 
-// DeleteLoginPassword deletes login/password.
-func (h *GRPCHandler) DeleteLoginPassword(ctx context.Context, in *pb.DeleteLoginPasswordRequest) (*pb.DeleteLoginPasswordResponse, error) {
+// DeleteData deletes data.
+func (h *GRPCHandler) DeleteData(ctx context.Context, in *pb.DeleteDataRequest) (*pb.DeleteDataResponse, error) {
 	handlerLogger := logger.GetContextLogger(ctx)
 
-	handlerLogger.Info("Delete login/password")
+	handlerLogger.Info("Delete data")
 
 	userID, err := getContextUserID(ctx)
 	if err != nil {
@@ -229,186 +220,28 @@ func (h *GRPCHandler) DeleteLoginPassword(ctx context.Context, in *pb.DeleteLogi
 		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
 	}
 
-	_, err = h.usecase.DeleteLoginPassword(
-		ctx,
-		userID,
-		in.Id,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to delete login/password",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	return &pb.DeleteLoginPasswordResponse{}, nil
-}
-
-// CreateBankCard creates bank card.
-func (h *GRPCHandler) CreateBankCard(ctx context.Context, in *pb.CreateBankCardRequest) (*pb.CreateBankCardResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Create bank card")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	_, err = h.usecase.CreateBankCard(
-		ctx,
-		userID,
-		in.Name,
-		in.NumberCipher,
-		in.ExpirationDateCipher,
-		in.SecurityCodeCipher,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to create bank card",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	return &pb.CreateBankCardResponse{}, nil
-}
-
-// GetBankCardBatch gets bank card batch.
-func (h *GRPCHandler) GetBankCardBatch(ctx context.Context, _ *pb.GetBankCardBatchRequest) (*pb.GetBankCardBatchResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Get bank card batch")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	batch, err := h.usecase.GetBankCardBatch(
-		ctx,
-		userID,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to get bank card batch",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	serializedBatch := make([]*pb.GetBankCardBatchResponse_BankCard, len(batch))
-	for i, bankCard := range batch {
-		serializedBatch[i] = bankCard.SerializeToProtobuf()
-	}
-
-	return &pb.GetBankCardBatchResponse{
-		BankCardBatch: serializedBatch,
-	}, nil
-}
-
-// UpdateBankCard updates bank card.
-func (h *GRPCHandler) UpdateBankCard(ctx context.Context, in *pb.UpdateBankCardRequest) (*pb.UpdateBankCardResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Update bank card")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	_, err = h.usecase.UpdateBankCard(
-		ctx,
-		userID,
-		in.Id,
-		in.Name,
-		in.NumberCipher,
-		in.ExpirationDateCipher,
-		in.SecurityCodeCipher,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to update bank card",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	return &pb.UpdateBankCardResponse{}, nil
-}
-
-// DeleteBankCard deletes bank card.
-func (h *GRPCHandler) DeleteBankCard(ctx context.Context, in *pb.DeleteBankCardRequest) (*pb.DeleteBankCardResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Delete bank card")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	_, err = h.usecase.DeleteBankCard(
+	_, err = h.usecase.DeleteData(
 		ctx,
 		userID,
 		in.Id,
 	)
 	if err != nil {
-		handlerLogger.Error("Failed to delete bank card",
+		handlerLogger.Error("Failed to delete data",
 			zap.Error(err),
 		)
 		return nil, status.Error(codes.Internal, InternalErrorMessage)
 	}
 
-	return &pb.DeleteBankCardResponse{}, nil
+	return &pb.DeleteDataResponse{}, nil
 }
 
-// CreateTextMeta creates text meta.
-func (h *GRPCHandler) CreateTextMeta(ctx context.Context, in *pb.CreateTextMetaRequest) (*pb.CreateTextMetaResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Create text meta")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	id, err := h.usecase.CreateTextMeta(
-		ctx,
-		userID,
-		in.Name,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to create text meta",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	return &pb.CreateTextMetaResponse{Id: id}, nil
-}
-
-// CreateText creates text.
-func (h *GRPCHandler) CreateText(stream pb.GoYandexGophkeeper_CreateTextServer) error {
+// CreateDataChunk creates data chunk.
+func (h *GRPCHandler) CreateDataChunk(stream pb.GoYandexGophkeeper_CreateDataChunkServer) error {
 	ctx := stream.Context()
 
 	handlerLogger := logger.GetContextLogger(ctx)
 
-	handlerLogger.Info("Create text")
+	handlerLogger.Info("Create data chunk")
 
 	userID, err := getContextUserID(ctx)
 	if err != nil {
@@ -424,20 +257,20 @@ func (h *GRPCHandler) CreateText(stream pb.GoYandexGophkeeper_CreateTextServer) 
 		chunk, err := stream.Recv()
 
 		if err == io.EOF {
-			return stream.SendAndClose(&pb.CreateTextResponse{})
+			return stream.SendAndClose(&pb.CreateDataChunkResponse{})
 		}
 
 		if err != nil {
-			handlerLogger.Error("Failed to receive text from stream",
+			handlerLogger.Error("Failed to receive data chunk from stream",
 				zap.Error(err),
 			)
 			return status.Error(codes.Internal, InternalErrorMessage)
 		}
 
 		if isFirstChunk {
-			err = h.usecase.SetTextStatus(ctx, userID, chunk.Id, StatusUploading)
+			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploading)
 			if err != nil {
-				handlerLogger.Error("Failed to set text uploaded",
+				handlerLogger.Error("Failed to set data status",
 					zap.Error(err),
 				)
 				return status.Error(codes.Internal, InternalErrorMessage)
@@ -446,19 +279,19 @@ func (h *GRPCHandler) CreateText(stream pb.GoYandexGophkeeper_CreateTextServer) 
 			isFirstChunk = false
 		}
 
-		if chunk.IsFinished != nil && *chunk.IsFinished == true {
-			err = h.usecase.SetTextStatus(ctx, userID, chunk.Id, StatusUploaded)
+		if chunk.IsLast == true {
+			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploaded)
 			if err != nil {
-				handlerLogger.Error("Failed to set text uploaded",
+				handlerLogger.Error("Failed to set data status",
 					zap.Error(err),
 				)
 				return status.Error(codes.Internal, InternalErrorMessage)
 			}
 		}
 
-		err = h.usecase.CreateText(ctx, userID, chunk.Id, chunk.TextChunk)
+		err = h.usecase.CreateDataChunk(ctx, userID, chunk.Id, chunk.DataChunk)
 		if err != nil {
-			handlerLogger.Error("Failed to create text",
+			handlerLogger.Error("Failed to create data chunk",
 				zap.Error(err),
 			)
 			return status.Error(codes.Internal, InternalErrorMessage)
@@ -466,48 +299,13 @@ func (h *GRPCHandler) CreateText(stream pb.GoYandexGophkeeper_CreateTextServer) 
 	}
 }
 
-// GetTextMetaBatch gets text meta batch.
-func (h *GRPCHandler) GetTextMetaBatch(ctx context.Context, _ *pb.GetTextMetaBatchRequest) (*pb.GetTextMetaBatchResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Get text meta batch")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	batch, err := h.usecase.GetTextMetaBatch(
-		ctx,
-		userID,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to get text meta batch",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	serializedBatch := make([]*pb.GetTextMetaBatchResponse_TextMeta, len(batch))
-	for i, textMeta := range batch {
-		serializedBatch[i] = textMeta.SerializeToProtobuf()
-	}
-
-	return &pb.GetTextMetaBatchResponse{
-		TextMetaBatch: serializedBatch,
-	}, nil
-}
-
-// GetText gets text.
-func (h *GRPCHandler) GetText(in *pb.GetTextRequest, stream pb.GoYandexGophkeeper_GetTextServer) error {
+// GetDataChunk gets data chunk.
+func (h *GRPCHandler) GetDataChunk(in *pb.GetDataChunkRequest, stream pb.GoYandexGophkeeper_GetDataChunkServer) error {
 	ctx := stream.Context()
 
 	handlerLogger := logger.GetContextLogger(ctx)
 
-	handlerLogger.Info("Get text")
+	handlerLogger.Info("Get data chunk")
 
 	userID, err := getContextUserID(ctx)
 	if err != nil {
@@ -518,22 +316,22 @@ func (h *GRPCHandler) GetText(in *pb.GetTextRequest, stream pb.GoYandexGophkeepe
 	}
 
 	for {
-		chunk, err := h.usecase.GetText(ctx, userID, in.Id)
+		chunk, err := h.usecase.GetDataChunk(ctx, userID, in.Id)
 
 		if err == io.EOF {
 			return nil
 		}
 
 		if err != nil {
-			handlerLogger.Error("Failed to get text",
+			handlerLogger.Error("Failed to get data",
 				zap.Error(err),
 			)
 			return status.Error(codes.Internal, InternalErrorMessage)
 		}
 
-		err = stream.Send(&pb.GetTextResponse{TextChunk: chunk})
+		err = stream.Send(&pb.GetDataChunkResponse{DataChunk: chunk})
 		if err != nil {
-			handlerLogger.Error("Failed to send text in stream",
+			handlerLogger.Error("Failed to send data chunk in stream",
 				zap.Error(err),
 			)
 			return status.Error(codes.Internal, InternalErrorMessage)
@@ -541,43 +339,13 @@ func (h *GRPCHandler) GetText(in *pb.GetTextRequest, stream pb.GoYandexGophkeepe
 	}
 }
 
-// UpdateTextMeta updates text meta.
-func (h *GRPCHandler) UpdateTextMeta(ctx context.Context, in *pb.UpdateTextMetaRequest) (*pb.UpdateTextMetaResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Update text meta")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	err = h.usecase.UpdateTextMeta(
-		ctx,
-		userID,
-		in.Id,
-		in.Name,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to update text meta",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	return &pb.UpdateTextMetaResponse{}, nil
-}
-
-// UpdateText updates text.
-func (h *GRPCHandler) UpdateText(stream pb.GoYandexGophkeeper_UpdateTextServer) error {
+// UpdateDataChunk updates data chunk.
+func (h *GRPCHandler) UpdateDataChunk(stream pb.GoYandexGophkeeper_UpdateDataChunkServer) error {
 	ctx := stream.Context()
 
 	handlerLogger := logger.GetContextLogger(ctx)
 
-	handlerLogger.Info("update text")
+	handlerLogger.Info("Update data chunk")
 
 	userID, err := getContextUserID(ctx)
 	if err != nil {
@@ -593,20 +361,20 @@ func (h *GRPCHandler) UpdateText(stream pb.GoYandexGophkeeper_UpdateTextServer) 
 		chunk, err := stream.Recv()
 
 		if err == io.EOF {
-			return stream.SendAndClose(&pb.UpdateTextResponse{})
+			return stream.SendAndClose(&pb.UpdateDataChunkResponse{})
 		}
 
 		if err != nil {
-			handlerLogger.Error("Failed to receive text from stream",
+			handlerLogger.Error("Failed to receive data chunk from stream",
 				zap.Error(err),
 			)
 			return status.Error(codes.Internal, InternalErrorMessage)
 		}
 
 		if isFirstChunk {
-			err = h.usecase.SetTextStatus(ctx, userID, chunk.Id, StatusUploading)
+			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploading)
 			if err != nil {
-				handlerLogger.Error("Failed to set text uploaded",
+				handlerLogger.Error("Failed to set data status",
 					zap.Error(err),
 				)
 				return status.Error(codes.Internal, InternalErrorMessage)
@@ -615,51 +383,22 @@ func (h *GRPCHandler) UpdateText(stream pb.GoYandexGophkeeper_UpdateTextServer) 
 			isFirstChunk = false
 		}
 
-		if chunk.IsFinished != nil && *chunk.IsFinished == true {
-			err = h.usecase.SetTextStatus(ctx, userID, chunk.Id, StatusUploaded)
+		if chunk.IsLast == true {
+			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploaded)
 			if err != nil {
-				handlerLogger.Error("Failed to set text uploaded",
+				handlerLogger.Error("Failed to set data status",
 					zap.Error(err),
 				)
 				return status.Error(codes.Internal, InternalErrorMessage)
 			}
 		}
 
-		err = h.usecase.CreateText(ctx, userID, chunk.Id, chunk.TextChunk)
+		err = h.usecase.CreateDataChunk(ctx, userID, chunk.Id, chunk.DataChunk)
 		if err != nil {
-			handlerLogger.Error("Failed to create text",
+			handlerLogger.Error("Failed to create data chunk",
 				zap.Error(err),
 			)
 			return status.Error(codes.Internal, InternalErrorMessage)
 		}
 	}
-}
-
-// DeleteText deletes text.
-func (h *GRPCHandler) DeleteText(ctx context.Context, in *pb.DeleteTextRequest) (*pb.DeleteTextResponse, error) {
-	handlerLogger := logger.GetContextLogger(ctx)
-
-	handlerLogger.Info("Delete text")
-
-	userID, err := getContextUserID(ctx)
-	if err != nil {
-		handlerLogger.Warn(NoUserIDLogMessage,
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-	}
-
-	_, err = h.usecase.DeleteText(
-		ctx,
-		userID,
-		in.Id,
-	)
-	if err != nil {
-		handlerLogger.Error("Failed to delete text",
-			zap.Error(err),
-		)
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	return &pb.DeleteTextResponse{}, nil
 }

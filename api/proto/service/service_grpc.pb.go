@@ -4,7 +4,7 @@
 // - protoc             v5.29.2
 // source: api/proto/service/service.proto
 
-package service
+package service_2
 
 import (
 	context "context"
@@ -19,30 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GoYandexGophkeeper_Register_FullMethodName               = "/service.GoYandexGophkeeper/Register"
-	GoYandexGophkeeper_Login_FullMethodName                  = "/service.GoYandexGophkeeper/Login"
-	GoYandexGophkeeper_CreateLoginPassword_FullMethodName    = "/service.GoYandexGophkeeper/CreateLoginPassword"
-	GoYandexGophkeeper_GetLoginPasswordBatch_FullMethodName  = "/service.GoYandexGophkeeper/GetLoginPasswordBatch"
-	GoYandexGophkeeper_UpdateLoginPassword_FullMethodName    = "/service.GoYandexGophkeeper/UpdateLoginPassword"
-	GoYandexGophkeeper_DeleteLoginPassword_FullMethodName    = "/service.GoYandexGophkeeper/DeleteLoginPassword"
-	GoYandexGophkeeper_CreateBankCard_FullMethodName         = "/service.GoYandexGophkeeper/CreateBankCard"
-	GoYandexGophkeeper_GetBankCardBatch_FullMethodName       = "/service.GoYandexGophkeeper/GetBankCardBatch"
-	GoYandexGophkeeper_UpdateBankCard_FullMethodName         = "/service.GoYandexGophkeeper/UpdateBankCard"
-	GoYandexGophkeeper_DeleteBankCard_FullMethodName         = "/service.GoYandexGophkeeper/DeleteBankCard"
-	GoYandexGophkeeper_CreateTextMeta_FullMethodName         = "/service.GoYandexGophkeeper/CreateTextMeta"
-	GoYandexGophkeeper_CreateText_FullMethodName             = "/service.GoYandexGophkeeper/CreateText"
-	GoYandexGophkeeper_GetTextMetaBatch_FullMethodName       = "/service.GoYandexGophkeeper/GetTextMetaBatch"
-	GoYandexGophkeeper_GetText_FullMethodName                = "/service.GoYandexGophkeeper/GetText"
-	GoYandexGophkeeper_UpdateTextMeta_FullMethodName         = "/service.GoYandexGophkeeper/UpdateTextMeta"
-	GoYandexGophkeeper_UpdateText_FullMethodName             = "/service.GoYandexGophkeeper/UpdateText"
-	GoYandexGophkeeper_DeleteText_FullMethodName             = "/service.GoYandexGophkeeper/DeleteText"
-	GoYandexGophkeeper_CreateBinaryDataMeta_FullMethodName   = "/service.GoYandexGophkeeper/CreateBinaryDataMeta"
-	GoYandexGophkeeper_CreateBinaryData_FullMethodName       = "/service.GoYandexGophkeeper/CreateBinaryData"
-	GoYandexGophkeeper_GetBinaryDataMetaBatch_FullMethodName = "/service.GoYandexGophkeeper/GetBinaryDataMetaBatch"
-	GoYandexGophkeeper_GetBinaryData_FullMethodName          = "/service.GoYandexGophkeeper/GetBinaryData"
-	GoYandexGophkeeper_UpdateBinaryDataMeta_FullMethodName   = "/service.GoYandexGophkeeper/UpdateBinaryDataMeta"
-	GoYandexGophkeeper_UpdateBinaryData_FullMethodName       = "/service.GoYandexGophkeeper/UpdateBinaryData"
-	GoYandexGophkeeper_DeleteBinaryData_FullMethodName       = "/service.GoYandexGophkeeper/DeleteBinaryData"
+	GoYandexGophkeeper_Register_FullMethodName        = "/service_2.GoYandexGophkeeper/Register"
+	GoYandexGophkeeper_Login_FullMethodName           = "/service_2.GoYandexGophkeeper/Login"
+	GoYandexGophkeeper_CreateData_FullMethodName      = "/service_2.GoYandexGophkeeper/CreateData"
+	GoYandexGophkeeper_GetDataBatch_FullMethodName    = "/service_2.GoYandexGophkeeper/GetDataBatch"
+	GoYandexGophkeeper_UpdateData_FullMethodName      = "/service_2.GoYandexGophkeeper/UpdateData"
+	GoYandexGophkeeper_DeleteData_FullMethodName      = "/service_2.GoYandexGophkeeper/DeleteData"
+	GoYandexGophkeeper_CreateDataChunk_FullMethodName = "/service_2.GoYandexGophkeeper/CreateDataChunk"
+	GoYandexGophkeeper_GetDataChunk_FullMethodName    = "/service_2.GoYandexGophkeeper/GetDataChunk"
+	GoYandexGophkeeper_UpdateDataChunk_FullMethodName = "/service_2.GoYandexGophkeeper/UpdateDataChunk"
 )
 
 // GoYandexGophkeeperClient is the client API for GoYandexGophkeeper service.
@@ -51,28 +36,13 @@ const (
 type GoYandexGophkeeperClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	CreateLoginPassword(ctx context.Context, in *CreateLoginPasswordRequest, opts ...grpc.CallOption) (*CreateLoginPasswordResponse, error)
-	GetLoginPasswordBatch(ctx context.Context, in *GetLoginPasswordBatchRequest, opts ...grpc.CallOption) (*GetLoginPasswordBatchResponse, error)
-	UpdateLoginPassword(ctx context.Context, in *UpdateLoginPasswordRequest, opts ...grpc.CallOption) (*UpdateLoginPasswordResponse, error)
-	DeleteLoginPassword(ctx context.Context, in *DeleteLoginPasswordRequest, opts ...grpc.CallOption) (*DeleteLoginPasswordResponse, error)
-	CreateBankCard(ctx context.Context, in *CreateBankCardRequest, opts ...grpc.CallOption) (*CreateBankCardResponse, error)
-	GetBankCardBatch(ctx context.Context, in *GetBankCardBatchRequest, opts ...grpc.CallOption) (*GetBankCardBatchResponse, error)
-	UpdateBankCard(ctx context.Context, in *UpdateBankCardRequest, opts ...grpc.CallOption) (*UpdateBankCardResponse, error)
-	DeleteBankCard(ctx context.Context, in *DeleteBankCardRequest, opts ...grpc.CallOption) (*DeleteBankCardResponse, error)
-	CreateTextMeta(ctx context.Context, in *CreateTextMetaRequest, opts ...grpc.CallOption) (*CreateTextMetaResponse, error)
-	CreateText(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateTextRequest, CreateTextResponse], error)
-	GetTextMetaBatch(ctx context.Context, in *GetTextMetaBatchRequest, opts ...grpc.CallOption) (*GetTextMetaBatchResponse, error)
-	GetText(ctx context.Context, in *GetTextRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetTextResponse], error)
-	UpdateTextMeta(ctx context.Context, in *UpdateTextMetaRequest, opts ...grpc.CallOption) (*UpdateTextMetaResponse, error)
-	UpdateText(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateTextRequest, UpdateTextResponse], error)
-	DeleteText(ctx context.Context, in *DeleteTextRequest, opts ...grpc.CallOption) (*DeleteTextResponse, error)
-	CreateBinaryDataMeta(ctx context.Context, in *CreateBinaryDataMetaRequest, opts ...grpc.CallOption) (*CreateBinaryDataMetaResponse, error)
-	CreateBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateBinaryDataRequest, CreateBinaryDataResponse], error)
-	GetBinaryDataMetaBatch(ctx context.Context, in *GetBinaryDataMetaBatchRequest, opts ...grpc.CallOption) (*GetBinaryDataMetaBatchResponse, error)
-	GetBinaryData(ctx context.Context, in *GetBinaryDataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetBinaryDataResponse], error)
-	UpdateBinaryDataMeta(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse], error)
-	UpdateBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateBinaryDataRequest, UpdateBinaryDataResponse], error)
-	DeleteBinaryData(ctx context.Context, in *DeleteBinaryDataRequest, opts ...grpc.CallOption) (*DeleteBinaryDataResponse, error)
+	CreateData(ctx context.Context, in *CreateDataRequest, opts ...grpc.CallOption) (*CreateDataResponse, error)
+	GetDataBatch(ctx context.Context, in *GetDataBatchRequest, opts ...grpc.CallOption) (*GetDataBatchResponse, error)
+	UpdateData(ctx context.Context, in *UpdateDataRequest, opts ...grpc.CallOption) (*UpdateDataResponse, error)
+	DeleteData(ctx context.Context, in *DeleteDataRequest, opts ...grpc.CallOption) (*DeleteDataResponse, error)
+	CreateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateDataChunkRequest, CreateDataChunkResponse], error)
+	GetDataChunk(ctx context.Context, in *GetDataChunkRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetDataChunkResponse], error)
+	UpdateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateDataChunkRequest, UpdateDataChunkResponse], error)
 }
 
 type goYandexGophkeeperClient struct {
@@ -103,126 +73,66 @@ func (c *goYandexGophkeeperClient) Login(ctx context.Context, in *LoginRequest, 
 	return out, nil
 }
 
-func (c *goYandexGophkeeperClient) CreateLoginPassword(ctx context.Context, in *CreateLoginPasswordRequest, opts ...grpc.CallOption) (*CreateLoginPasswordResponse, error) {
+func (c *goYandexGophkeeperClient) CreateData(ctx context.Context, in *CreateDataRequest, opts ...grpc.CallOption) (*CreateDataResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateLoginPasswordResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_CreateLoginPassword_FullMethodName, in, out, cOpts...)
+	out := new(CreateDataResponse)
+	err := c.cc.Invoke(ctx, GoYandexGophkeeper_CreateData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goYandexGophkeeperClient) GetLoginPasswordBatch(ctx context.Context, in *GetLoginPasswordBatchRequest, opts ...grpc.CallOption) (*GetLoginPasswordBatchResponse, error) {
+func (c *goYandexGophkeeperClient) GetDataBatch(ctx context.Context, in *GetDataBatchRequest, opts ...grpc.CallOption) (*GetDataBatchResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetLoginPasswordBatchResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_GetLoginPasswordBatch_FullMethodName, in, out, cOpts...)
+	out := new(GetDataBatchResponse)
+	err := c.cc.Invoke(ctx, GoYandexGophkeeper_GetDataBatch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goYandexGophkeeperClient) UpdateLoginPassword(ctx context.Context, in *UpdateLoginPasswordRequest, opts ...grpc.CallOption) (*UpdateLoginPasswordResponse, error) {
+func (c *goYandexGophkeeperClient) UpdateData(ctx context.Context, in *UpdateDataRequest, opts ...grpc.CallOption) (*UpdateDataResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateLoginPasswordResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_UpdateLoginPassword_FullMethodName, in, out, cOpts...)
+	out := new(UpdateDataResponse)
+	err := c.cc.Invoke(ctx, GoYandexGophkeeper_UpdateData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goYandexGophkeeperClient) DeleteLoginPassword(ctx context.Context, in *DeleteLoginPasswordRequest, opts ...grpc.CallOption) (*DeleteLoginPasswordResponse, error) {
+func (c *goYandexGophkeeperClient) DeleteData(ctx context.Context, in *DeleteDataRequest, opts ...grpc.CallOption) (*DeleteDataResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteLoginPasswordResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_DeleteLoginPassword_FullMethodName, in, out, cOpts...)
+	out := new(DeleteDataResponse)
+	err := c.cc.Invoke(ctx, GoYandexGophkeeper_DeleteData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *goYandexGophkeeperClient) CreateBankCard(ctx context.Context, in *CreateBankCardRequest, opts ...grpc.CallOption) (*CreateBankCardResponse, error) {
+func (c *goYandexGophkeeperClient) CreateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateDataChunkRequest, CreateDataChunkResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateBankCardResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_CreateBankCard_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[0], GoYandexGophkeeper_CreateDataChunk_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) GetBankCardBatch(ctx context.Context, in *GetBankCardBatchRequest, opts ...grpc.CallOption) (*GetBankCardBatchResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetBankCardBatchResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_GetBankCardBatch_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) UpdateBankCard(ctx context.Context, in *UpdateBankCardRequest, opts ...grpc.CallOption) (*UpdateBankCardResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateBankCardResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_UpdateBankCard_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) DeleteBankCard(ctx context.Context, in *DeleteBankCardRequest, opts ...grpc.CallOption) (*DeleteBankCardResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteBankCardResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_DeleteBankCard_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) CreateTextMeta(ctx context.Context, in *CreateTextMetaRequest, opts ...grpc.CallOption) (*CreateTextMetaResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateTextMetaResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_CreateTextMeta_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) CreateText(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateTextRequest, CreateTextResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[0], GoYandexGophkeeper_CreateText_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[CreateTextRequest, CreateTextResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[CreateDataChunkRequest, CreateDataChunkResponse]{ClientStream: stream}
 	return x, nil
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_CreateTextClient = grpc.ClientStreamingClient[CreateTextRequest, CreateTextResponse]
+type GoYandexGophkeeper_CreateDataChunkClient = grpc.ClientStreamingClient[CreateDataChunkRequest, CreateDataChunkResponse]
 
-func (c *goYandexGophkeeperClient) GetTextMetaBatch(ctx context.Context, in *GetTextMetaBatchRequest, opts ...grpc.CallOption) (*GetTextMetaBatchResponse, error) {
+func (c *goYandexGophkeeperClient) GetDataChunk(ctx context.Context, in *GetDataChunkRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetDataChunkResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetTextMetaBatchResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_GetTextMetaBatch_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[1], GoYandexGophkeeper_GetDataChunk_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) GetText(ctx context.Context, in *GetTextRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetTextResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[1], GoYandexGophkeeper_GetText_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[GetTextRequest, GetTextResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[GetDataChunkRequest, GetDataChunkResponse]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -233,128 +143,20 @@ func (c *goYandexGophkeeperClient) GetText(ctx context.Context, in *GetTextReque
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_GetTextClient = grpc.ServerStreamingClient[GetTextResponse]
+type GoYandexGophkeeper_GetDataChunkClient = grpc.ServerStreamingClient[GetDataChunkResponse]
 
-func (c *goYandexGophkeeperClient) UpdateTextMeta(ctx context.Context, in *UpdateTextMetaRequest, opts ...grpc.CallOption) (*UpdateTextMetaResponse, error) {
+func (c *goYandexGophkeeperClient) UpdateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateDataChunkRequest, UpdateDataChunkResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateTextMetaResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_UpdateTextMeta_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[2], GoYandexGophkeeper_UpdateDataChunk_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) UpdateText(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateTextRequest, UpdateTextResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[2], GoYandexGophkeeper_UpdateText_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[UpdateTextRequest, UpdateTextResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[UpdateDataChunkRequest, UpdateDataChunkResponse]{ClientStream: stream}
 	return x, nil
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateTextClient = grpc.ClientStreamingClient[UpdateTextRequest, UpdateTextResponse]
-
-func (c *goYandexGophkeeperClient) DeleteText(ctx context.Context, in *DeleteTextRequest, opts ...grpc.CallOption) (*DeleteTextResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteTextResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_DeleteText_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) CreateBinaryDataMeta(ctx context.Context, in *CreateBinaryDataMetaRequest, opts ...grpc.CallOption) (*CreateBinaryDataMetaResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateBinaryDataMetaResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_CreateBinaryDataMeta_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) CreateBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateBinaryDataRequest, CreateBinaryDataResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[3], GoYandexGophkeeper_CreateBinaryData_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[CreateBinaryDataRequest, CreateBinaryDataResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_CreateBinaryDataClient = grpc.ClientStreamingClient[CreateBinaryDataRequest, CreateBinaryDataResponse]
-
-func (c *goYandexGophkeeperClient) GetBinaryDataMetaBatch(ctx context.Context, in *GetBinaryDataMetaBatchRequest, opts ...grpc.CallOption) (*GetBinaryDataMetaBatchResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetBinaryDataMetaBatchResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_GetBinaryDataMetaBatch_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *goYandexGophkeeperClient) GetBinaryData(ctx context.Context, in *GetBinaryDataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetBinaryDataResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[4], GoYandexGophkeeper_GetBinaryData_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[GetBinaryDataRequest, GetBinaryDataResponse]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_GetBinaryDataClient = grpc.ServerStreamingClient[GetBinaryDataResponse]
-
-func (c *goYandexGophkeeperClient) UpdateBinaryDataMeta(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[5], GoYandexGophkeeper_UpdateBinaryDataMeta_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateBinaryDataMetaClient = grpc.ClientStreamingClient[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse]
-
-func (c *goYandexGophkeeperClient) UpdateBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateBinaryDataRequest, UpdateBinaryDataResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[6], GoYandexGophkeeper_UpdateBinaryData_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[UpdateBinaryDataRequest, UpdateBinaryDataResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateBinaryDataClient = grpc.ClientStreamingClient[UpdateBinaryDataRequest, UpdateBinaryDataResponse]
-
-func (c *goYandexGophkeeperClient) DeleteBinaryData(ctx context.Context, in *DeleteBinaryDataRequest, opts ...grpc.CallOption) (*DeleteBinaryDataResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteBinaryDataResponse)
-	err := c.cc.Invoke(ctx, GoYandexGophkeeper_DeleteBinaryData_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
+type GoYandexGophkeeper_UpdateDataChunkClient = grpc.ClientStreamingClient[UpdateDataChunkRequest, UpdateDataChunkResponse]
 
 // GoYandexGophkeeperServer is the server API for GoYandexGophkeeper service.
 // All implementations must embed UnimplementedGoYandexGophkeeperServer
@@ -362,28 +164,13 @@ func (c *goYandexGophkeeperClient) DeleteBinaryData(ctx context.Context, in *Del
 type GoYandexGophkeeperServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	CreateLoginPassword(context.Context, *CreateLoginPasswordRequest) (*CreateLoginPasswordResponse, error)
-	GetLoginPasswordBatch(context.Context, *GetLoginPasswordBatchRequest) (*GetLoginPasswordBatchResponse, error)
-	UpdateLoginPassword(context.Context, *UpdateLoginPasswordRequest) (*UpdateLoginPasswordResponse, error)
-	DeleteLoginPassword(context.Context, *DeleteLoginPasswordRequest) (*DeleteLoginPasswordResponse, error)
-	CreateBankCard(context.Context, *CreateBankCardRequest) (*CreateBankCardResponse, error)
-	GetBankCardBatch(context.Context, *GetBankCardBatchRequest) (*GetBankCardBatchResponse, error)
-	UpdateBankCard(context.Context, *UpdateBankCardRequest) (*UpdateBankCardResponse, error)
-	DeleteBankCard(context.Context, *DeleteBankCardRequest) (*DeleteBankCardResponse, error)
-	CreateTextMeta(context.Context, *CreateTextMetaRequest) (*CreateTextMetaResponse, error)
-	CreateText(grpc.ClientStreamingServer[CreateTextRequest, CreateTextResponse]) error
-	GetTextMetaBatch(context.Context, *GetTextMetaBatchRequest) (*GetTextMetaBatchResponse, error)
-	GetText(*GetTextRequest, grpc.ServerStreamingServer[GetTextResponse]) error
-	UpdateTextMeta(context.Context, *UpdateTextMetaRequest) (*UpdateTextMetaResponse, error)
-	UpdateText(grpc.ClientStreamingServer[UpdateTextRequest, UpdateTextResponse]) error
-	DeleteText(context.Context, *DeleteTextRequest) (*DeleteTextResponse, error)
-	CreateBinaryDataMeta(context.Context, *CreateBinaryDataMetaRequest) (*CreateBinaryDataMetaResponse, error)
-	CreateBinaryData(grpc.ClientStreamingServer[CreateBinaryDataRequest, CreateBinaryDataResponse]) error
-	GetBinaryDataMetaBatch(context.Context, *GetBinaryDataMetaBatchRequest) (*GetBinaryDataMetaBatchResponse, error)
-	GetBinaryData(*GetBinaryDataRequest, grpc.ServerStreamingServer[GetBinaryDataResponse]) error
-	UpdateBinaryDataMeta(grpc.ClientStreamingServer[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse]) error
-	UpdateBinaryData(grpc.ClientStreamingServer[UpdateBinaryDataRequest, UpdateBinaryDataResponse]) error
-	DeleteBinaryData(context.Context, *DeleteBinaryDataRequest) (*DeleteBinaryDataResponse, error)
+	CreateData(context.Context, *CreateDataRequest) (*CreateDataResponse, error)
+	GetDataBatch(context.Context, *GetDataBatchRequest) (*GetDataBatchResponse, error)
+	UpdateData(context.Context, *UpdateDataRequest) (*UpdateDataResponse, error)
+	DeleteData(context.Context, *DeleteDataRequest) (*DeleteDataResponse, error)
+	CreateDataChunk(grpc.ClientStreamingServer[CreateDataChunkRequest, CreateDataChunkResponse]) error
+	GetDataChunk(*GetDataChunkRequest, grpc.ServerStreamingServer[GetDataChunkResponse]) error
+	UpdateDataChunk(grpc.ClientStreamingServer[UpdateDataChunkRequest, UpdateDataChunkResponse]) error
 	mustEmbedUnimplementedGoYandexGophkeeperServer()
 }
 
@@ -400,71 +187,26 @@ func (UnimplementedGoYandexGophkeeperServer) Register(context.Context, *Register
 func (UnimplementedGoYandexGophkeeperServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedGoYandexGophkeeperServer) CreateLoginPassword(context.Context, *CreateLoginPasswordRequest) (*CreateLoginPasswordResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateLoginPassword not implemented")
+func (UnimplementedGoYandexGophkeeperServer) CreateData(context.Context, *CreateDataRequest) (*CreateDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateData not implemented")
 }
-func (UnimplementedGoYandexGophkeeperServer) GetLoginPasswordBatch(context.Context, *GetLoginPasswordBatchRequest) (*GetLoginPasswordBatchResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetLoginPasswordBatch not implemented")
+func (UnimplementedGoYandexGophkeeperServer) GetDataBatch(context.Context, *GetDataBatchRequest) (*GetDataBatchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDataBatch not implemented")
 }
-func (UnimplementedGoYandexGophkeeperServer) UpdateLoginPassword(context.Context, *UpdateLoginPasswordRequest) (*UpdateLoginPasswordResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateLoginPassword not implemented")
+func (UnimplementedGoYandexGophkeeperServer) UpdateData(context.Context, *UpdateDataRequest) (*UpdateDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateData not implemented")
 }
-func (UnimplementedGoYandexGophkeeperServer) DeleteLoginPassword(context.Context, *DeleteLoginPasswordRequest) (*DeleteLoginPasswordResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteLoginPassword not implemented")
+func (UnimplementedGoYandexGophkeeperServer) DeleteData(context.Context, *DeleteDataRequest) (*DeleteDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteData not implemented")
 }
-func (UnimplementedGoYandexGophkeeperServer) CreateBankCard(context.Context, *CreateBankCardRequest) (*CreateBankCardResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateBankCard not implemented")
+func (UnimplementedGoYandexGophkeeperServer) CreateDataChunk(grpc.ClientStreamingServer[CreateDataChunkRequest, CreateDataChunkResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method CreateDataChunk not implemented")
 }
-func (UnimplementedGoYandexGophkeeperServer) GetBankCardBatch(context.Context, *GetBankCardBatchRequest) (*GetBankCardBatchResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetBankCardBatch not implemented")
+func (UnimplementedGoYandexGophkeeperServer) GetDataChunk(*GetDataChunkRequest, grpc.ServerStreamingServer[GetDataChunkResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetDataChunk not implemented")
 }
-func (UnimplementedGoYandexGophkeeperServer) UpdateBankCard(context.Context, *UpdateBankCardRequest) (*UpdateBankCardResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateBankCard not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) DeleteBankCard(context.Context, *DeleteBankCardRequest) (*DeleteBankCardResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteBankCard not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) CreateTextMeta(context.Context, *CreateTextMetaRequest) (*CreateTextMetaResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateTextMeta not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) CreateText(grpc.ClientStreamingServer[CreateTextRequest, CreateTextResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method CreateText not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) GetTextMetaBatch(context.Context, *GetTextMetaBatchRequest) (*GetTextMetaBatchResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTextMetaBatch not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) GetText(*GetTextRequest, grpc.ServerStreamingServer[GetTextResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method GetText not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) UpdateTextMeta(context.Context, *UpdateTextMetaRequest) (*UpdateTextMetaResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateTextMeta not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) UpdateText(grpc.ClientStreamingServer[UpdateTextRequest, UpdateTextResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method UpdateText not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) DeleteText(context.Context, *DeleteTextRequest) (*DeleteTextResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteText not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) CreateBinaryDataMeta(context.Context, *CreateBinaryDataMetaRequest) (*CreateBinaryDataMetaResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateBinaryDataMeta not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) CreateBinaryData(grpc.ClientStreamingServer[CreateBinaryDataRequest, CreateBinaryDataResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method CreateBinaryData not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) GetBinaryDataMetaBatch(context.Context, *GetBinaryDataMetaBatchRequest) (*GetBinaryDataMetaBatchResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetBinaryDataMetaBatch not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) GetBinaryData(*GetBinaryDataRequest, grpc.ServerStreamingServer[GetBinaryDataResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method GetBinaryData not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) UpdateBinaryDataMeta(grpc.ClientStreamingServer[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method UpdateBinaryDataMeta not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) UpdateBinaryData(grpc.ClientStreamingServer[UpdateBinaryDataRequest, UpdateBinaryDataResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method UpdateBinaryData not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) DeleteBinaryData(context.Context, *DeleteBinaryDataRequest) (*DeleteBinaryDataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteBinaryData not implemented")
+func (UnimplementedGoYandexGophkeeperServer) UpdateDataChunk(grpc.ClientStreamingServer[UpdateDataChunkRequest, UpdateDataChunkResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method UpdateDataChunk not implemented")
 }
 func (UnimplementedGoYandexGophkeeperServer) mustEmbedUnimplementedGoYandexGophkeeperServer() {}
 func (UnimplementedGoYandexGophkeeperServer) testEmbeddedByValue()                            {}
@@ -523,338 +265,108 @@ func _GoYandexGophkeeper_Login_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoYandexGophkeeper_CreateLoginPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateLoginPasswordRequest)
+func _GoYandexGophkeeper_CreateData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDataRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).CreateLoginPassword(ctx, in)
+		return srv.(GoYandexGophkeeperServer).CreateData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GoYandexGophkeeper_CreateLoginPassword_FullMethodName,
+		FullMethod: GoYandexGophkeeper_CreateData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).CreateLoginPassword(ctx, req.(*CreateLoginPasswordRequest))
+		return srv.(GoYandexGophkeeperServer).CreateData(ctx, req.(*CreateDataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoYandexGophkeeper_GetLoginPasswordBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetLoginPasswordBatchRequest)
+func _GoYandexGophkeeper_GetDataBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDataBatchRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).GetLoginPasswordBatch(ctx, in)
+		return srv.(GoYandexGophkeeperServer).GetDataBatch(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GoYandexGophkeeper_GetLoginPasswordBatch_FullMethodName,
+		FullMethod: GoYandexGophkeeper_GetDataBatch_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).GetLoginPasswordBatch(ctx, req.(*GetLoginPasswordBatchRequest))
+		return srv.(GoYandexGophkeeperServer).GetDataBatch(ctx, req.(*GetDataBatchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoYandexGophkeeper_UpdateLoginPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateLoginPasswordRequest)
+func _GoYandexGophkeeper_UpdateData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDataRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).UpdateLoginPassword(ctx, in)
+		return srv.(GoYandexGophkeeperServer).UpdateData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GoYandexGophkeeper_UpdateLoginPassword_FullMethodName,
+		FullMethod: GoYandexGophkeeper_UpdateData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).UpdateLoginPassword(ctx, req.(*UpdateLoginPasswordRequest))
+		return srv.(GoYandexGophkeeperServer).UpdateData(ctx, req.(*UpdateDataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoYandexGophkeeper_DeleteLoginPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteLoginPasswordRequest)
+func _GoYandexGophkeeper_DeleteData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDataRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).DeleteLoginPassword(ctx, in)
+		return srv.(GoYandexGophkeeperServer).DeleteData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GoYandexGophkeeper_DeleteLoginPassword_FullMethodName,
+		FullMethod: GoYandexGophkeeper_DeleteData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).DeleteLoginPassword(ctx, req.(*DeleteLoginPasswordRequest))
+		return srv.(GoYandexGophkeeperServer).DeleteData(ctx, req.(*DeleteDataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoYandexGophkeeper_CreateBankCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateBankCardRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).CreateBankCard(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_CreateBankCard_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).CreateBankCard(ctx, req.(*CreateBankCardRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_GetBankCardBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetBankCardBatchRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).GetBankCardBatch(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_GetBankCardBatch_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).GetBankCardBatch(ctx, req.(*GetBankCardBatchRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_UpdateBankCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateBankCardRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).UpdateBankCard(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_UpdateBankCard_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).UpdateBankCard(ctx, req.(*UpdateBankCardRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_DeleteBankCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteBankCardRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).DeleteBankCard(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_DeleteBankCard_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).DeleteBankCard(ctx, req.(*DeleteBankCardRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_CreateTextMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateTextMetaRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).CreateTextMeta(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_CreateTextMeta_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).CreateTextMeta(ctx, req.(*CreateTextMetaRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_CreateText_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GoYandexGophkeeperServer).CreateText(&grpc.GenericServerStream[CreateTextRequest, CreateTextResponse]{ServerStream: stream})
+func _GoYandexGophkeeper_CreateDataChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GoYandexGophkeeperServer).CreateDataChunk(&grpc.GenericServerStream[CreateDataChunkRequest, CreateDataChunkResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_CreateTextServer = grpc.ClientStreamingServer[CreateTextRequest, CreateTextResponse]
+type GoYandexGophkeeper_CreateDataChunkServer = grpc.ClientStreamingServer[CreateDataChunkRequest, CreateDataChunkResponse]
 
-func _GoYandexGophkeeper_GetTextMetaBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTextMetaBatchRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).GetTextMetaBatch(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_GetTextMetaBatch_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).GetTextMetaBatch(ctx, req.(*GetTextMetaBatchRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_GetText_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetTextRequest)
+func _GoYandexGophkeeper_GetDataChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetDataChunkRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(GoYandexGophkeeperServer).GetText(m, &grpc.GenericServerStream[GetTextRequest, GetTextResponse]{ServerStream: stream})
+	return srv.(GoYandexGophkeeperServer).GetDataChunk(m, &grpc.GenericServerStream[GetDataChunkRequest, GetDataChunkResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_GetTextServer = grpc.ServerStreamingServer[GetTextResponse]
+type GoYandexGophkeeper_GetDataChunkServer = grpc.ServerStreamingServer[GetDataChunkResponse]
 
-func _GoYandexGophkeeper_UpdateTextMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateTextMetaRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).UpdateTextMeta(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_UpdateTextMeta_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).UpdateTextMeta(ctx, req.(*UpdateTextMetaRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_UpdateText_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GoYandexGophkeeperServer).UpdateText(&grpc.GenericServerStream[UpdateTextRequest, UpdateTextResponse]{ServerStream: stream})
+func _GoYandexGophkeeper_UpdateDataChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GoYandexGophkeeperServer).UpdateDataChunk(&grpc.GenericServerStream[UpdateDataChunkRequest, UpdateDataChunkResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateTextServer = grpc.ClientStreamingServer[UpdateTextRequest, UpdateTextResponse]
-
-func _GoYandexGophkeeper_DeleteText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteTextRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).DeleteText(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_DeleteText_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).DeleteText(ctx, req.(*DeleteTextRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_CreateBinaryDataMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateBinaryDataMetaRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).CreateBinaryDataMeta(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_CreateBinaryDataMeta_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).CreateBinaryDataMeta(ctx, req.(*CreateBinaryDataMetaRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_CreateBinaryData_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GoYandexGophkeeperServer).CreateBinaryData(&grpc.GenericServerStream[CreateBinaryDataRequest, CreateBinaryDataResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_CreateBinaryDataServer = grpc.ClientStreamingServer[CreateBinaryDataRequest, CreateBinaryDataResponse]
-
-func _GoYandexGophkeeper_GetBinaryDataMetaBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetBinaryDataMetaBatchRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).GetBinaryDataMetaBatch(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_GetBinaryDataMetaBatch_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).GetBinaryDataMetaBatch(ctx, req.(*GetBinaryDataMetaBatchRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GoYandexGophkeeper_GetBinaryData_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetBinaryDataRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(GoYandexGophkeeperServer).GetBinaryData(m, &grpc.GenericServerStream[GetBinaryDataRequest, GetBinaryDataResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_GetBinaryDataServer = grpc.ServerStreamingServer[GetBinaryDataResponse]
-
-func _GoYandexGophkeeper_UpdateBinaryDataMeta_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GoYandexGophkeeperServer).UpdateBinaryDataMeta(&grpc.GenericServerStream[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateBinaryDataMetaServer = grpc.ClientStreamingServer[UpdateBinaryDataMetaRequest, UpdateBinaryDataMetaResponse]
-
-func _GoYandexGophkeeper_UpdateBinaryData_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GoYandexGophkeeperServer).UpdateBinaryData(&grpc.GenericServerStream[UpdateBinaryDataRequest, UpdateBinaryDataResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateBinaryDataServer = grpc.ClientStreamingServer[UpdateBinaryDataRequest, UpdateBinaryDataResponse]
-
-func _GoYandexGophkeeper_DeleteBinaryData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteBinaryDataRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GoYandexGophkeeperServer).DeleteBinaryData(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GoYandexGophkeeper_DeleteBinaryData_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoYandexGophkeeperServer).DeleteBinaryData(ctx, req.(*DeleteBinaryDataRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
+type GoYandexGophkeeper_UpdateDataChunkServer = grpc.ClientStreamingServer[UpdateDataChunkRequest, UpdateDataChunkResponse]
 
 // GoYandexGophkeeper_ServiceDesc is the grpc.ServiceDesc for GoYandexGophkeeper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GoYandexGophkeeper_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "service.GoYandexGophkeeper",
+	ServiceName: "service_2.GoYandexGophkeeper",
 	HandlerType: (*GoYandexGophkeeperServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -866,100 +378,36 @@ var GoYandexGophkeeper_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GoYandexGophkeeper_Login_Handler,
 		},
 		{
-			MethodName: "CreateLoginPassword",
-			Handler:    _GoYandexGophkeeper_CreateLoginPassword_Handler,
+			MethodName: "CreateData",
+			Handler:    _GoYandexGophkeeper_CreateData_Handler,
 		},
 		{
-			MethodName: "GetLoginPasswordBatch",
-			Handler:    _GoYandexGophkeeper_GetLoginPasswordBatch_Handler,
+			MethodName: "GetDataBatch",
+			Handler:    _GoYandexGophkeeper_GetDataBatch_Handler,
 		},
 		{
-			MethodName: "UpdateLoginPassword",
-			Handler:    _GoYandexGophkeeper_UpdateLoginPassword_Handler,
+			MethodName: "UpdateData",
+			Handler:    _GoYandexGophkeeper_UpdateData_Handler,
 		},
 		{
-			MethodName: "DeleteLoginPassword",
-			Handler:    _GoYandexGophkeeper_DeleteLoginPassword_Handler,
-		},
-		{
-			MethodName: "CreateBankCard",
-			Handler:    _GoYandexGophkeeper_CreateBankCard_Handler,
-		},
-		{
-			MethodName: "GetBankCardBatch",
-			Handler:    _GoYandexGophkeeper_GetBankCardBatch_Handler,
-		},
-		{
-			MethodName: "UpdateBankCard",
-			Handler:    _GoYandexGophkeeper_UpdateBankCard_Handler,
-		},
-		{
-			MethodName: "DeleteBankCard",
-			Handler:    _GoYandexGophkeeper_DeleteBankCard_Handler,
-		},
-		{
-			MethodName: "CreateTextMeta",
-			Handler:    _GoYandexGophkeeper_CreateTextMeta_Handler,
-		},
-		{
-			MethodName: "GetTextMetaBatch",
-			Handler:    _GoYandexGophkeeper_GetTextMetaBatch_Handler,
-		},
-		{
-			MethodName: "UpdateTextMeta",
-			Handler:    _GoYandexGophkeeper_UpdateTextMeta_Handler,
-		},
-		{
-			MethodName: "DeleteText",
-			Handler:    _GoYandexGophkeeper_DeleteText_Handler,
-		},
-		{
-			MethodName: "CreateBinaryDataMeta",
-			Handler:    _GoYandexGophkeeper_CreateBinaryDataMeta_Handler,
-		},
-		{
-			MethodName: "GetBinaryDataMetaBatch",
-			Handler:    _GoYandexGophkeeper_GetBinaryDataMetaBatch_Handler,
-		},
-		{
-			MethodName: "DeleteBinaryData",
-			Handler:    _GoYandexGophkeeper_DeleteBinaryData_Handler,
+			MethodName: "DeleteData",
+			Handler:    _GoYandexGophkeeper_DeleteData_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "CreateText",
-			Handler:       _GoYandexGophkeeper_CreateText_Handler,
+			StreamName:    "CreateDataChunk",
+			Handler:       _GoYandexGophkeeper_CreateDataChunk_Handler,
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "GetText",
-			Handler:       _GoYandexGophkeeper_GetText_Handler,
+			StreamName:    "GetDataChunk",
+			Handler:       _GoYandexGophkeeper_GetDataChunk_Handler,
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "UpdateText",
-			Handler:       _GoYandexGophkeeper_UpdateText_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "CreateBinaryData",
-			Handler:       _GoYandexGophkeeper_CreateBinaryData_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "GetBinaryData",
-			Handler:       _GoYandexGophkeeper_GetBinaryData_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "UpdateBinaryDataMeta",
-			Handler:       _GoYandexGophkeeper_UpdateBinaryDataMeta_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "UpdateBinaryData",
-			Handler:       _GoYandexGophkeeper_UpdateBinaryData_Handler,
+			StreamName:    "UpdateDataChunk",
+			Handler:       _GoYandexGophkeeper_UpdateDataChunk_Handler,
 			ClientStreams: true,
 		},
 	},

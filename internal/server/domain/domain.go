@@ -14,59 +14,23 @@ type User struct {
 	PrivateKeyHash string
 }
 
-type LoginPassword struct {
-	ID             string
-	UserID         string
-	Name           string
-	LoginCipher    string
-	PasswordCipher string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+type Data struct {
+	ID        string
+	UserID    string
+	Name      string
+	Type      string
+	Data      []byte
+	IsChunked bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
-func (lp LoginPassword) SerializeToProtobuf() *pb.GetLoginPasswordBatchResponse_LoginPassword {
-	return &pb.GetLoginPasswordBatchResponse_LoginPassword{
-		Id:             lp.ID,
-		Name:           lp.Name,
-		LoginCipher:    lp.LoginCipher,
-		PasswordCipher: lp.PasswordCipher,
-	}
-}
-
-type BankCard struct {
-	ID                   string
-	UserID               string
-	Name                 string
-	NumberCipher         string
-	ExpirationDateCipher string
-	SecurityCodeCipher   string
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-}
-
-func (bc BankCard) SerializeToProtobuf() *pb.GetBankCardBatchResponse_BankCard {
-	return &pb.GetBankCardBatchResponse_BankCard{
-		Id:                   bc.ID,
-		Name:                 bc.Name,
-		NumberCipher:         bc.NumberCipher,
-		ExpirationDateCipher: bc.ExpirationDateCipher,
-		SecurityCodeCipher:   bc.SecurityCodeCipher,
-	}
-}
-
-type TextMeta struct {
-	ID         string
-	UserID     string
-	Name       string
-	TextPrefix string
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-}
-
-func (tm TextMeta) SerializeToProtobuf() *pb.GetTextMetaBatchResponse_TextMeta {
-	return &pb.GetTextMetaBatchResponse_TextMeta{
-		Id:         tm.ID,
-		Name:       tm.Name,
-		TextPrefix: tm.TextPrefix,
+func (d Data) SerializeToProtobuf() *pb.GetDataBatchResponse_Data {
+	return &pb.GetDataBatchResponse_Data{
+		Id:        d.ID,
+		Name:      d.Name,
+		Type:      d.Type,
+		Data:      d.Data,
+		IsChunked: d.IsChunked,
 	}
 }
