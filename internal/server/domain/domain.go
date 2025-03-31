@@ -1,7 +1,9 @@
 package domain
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"time"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
@@ -46,4 +48,38 @@ func (d Data) SerializeToProtobuf() *pb.GetDataBatchResponse_Data {
 		Data:      d.Data,
 		IsChunked: d.IsChunked,
 	}
+}
+
+type DataChunk struct {
+	buf    *bytes.Buffer
+	isLast bool
+}
+
+func NewDataChunk(buf []byte) *DataChunk {
+	return &DataChunk{
+		buf:    bytes.NewBuffer(buf),
+		isLast: false,
+	}
+}
+
+func (dc *DataChunk) Read(p []byte) (n int, err error) {
+	n, err = dc.buf.Read(p)
+
+	if n == 0 || err == io.EOF {
+		if dc.isLast {
+			return n, err
+		}
+
+		n, err = dc.Read(p)
+	}
+
+	return n, err
+}
+
+func (dc *DataChunk) Write(p []byte) (n int, err error) {
+	return dc.buf.Write(p)
+}
+
+func (dc *DataChunk) SetIsLast() {
+	dc.isLast = true
 }
