@@ -13,8 +13,8 @@ import (
 type Status string
 
 const (
-	StatusUploaded  Status = "uploaded"
-	StatusUploading Status = "uploading"
+	StatusUploaded  Status = "UPLOADED"
+	StatusUploading Status = "UPLOADING"
 )
 
 var (
@@ -39,7 +39,6 @@ type Data struct {
 	SizeInBytes uint64
 	Status      Status
 	Data        []byte
-	IsChunked   bool
 	ExternalID  *string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
@@ -52,7 +51,7 @@ func (d Data) SerializeToProtobuf() *pb.GetDataBatchResponse_Data {
 		Type:        d.Type,
 		SizeInBytes: d.SizeInBytes,
 		Data:        d.Data,
-		IsChunked:   d.IsChunked,
+		IsChunked:   d.ExternalID != nil,
 	}
 }
 

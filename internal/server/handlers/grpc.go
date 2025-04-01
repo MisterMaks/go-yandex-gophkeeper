@@ -24,7 +24,7 @@ const (
 	UserUnauthorizedMessage = "User unauthorized"
 	InternalErrorMessage    = "Internal error"
 
-	ChunkSize uint = 1024 * 1024
+	ChunkSize uint = 100 * 1024
 )
 
 // UsecaseInterface contains the necessary functions for the business logic of app.
