@@ -4,21 +4,23 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"sync"
 	"time"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
+)
+
+type Status string
+
+const (
+	StatusUploaded  Status = "uploaded"
+	StatusUploading Status = "uploading"
 )
 
 var (
 	ErrLoginTaken                 = errors.New("login already taken")
 	ErrInvalidLoginPassword       = errors.New("invalid login/password")
 	ErrInvalidLoginPasswordFormat = errors.New("invalid login/password format")
-
-	ErrOrderUploaded              = errors.New("order number has already been uploaded by this user")
-	ErrOrderUploadedByAnotherUser = errors.New("order number has already been uploaded by another user")
-
-	ErrInsufficientFunds  = errors.New("there are insufficient funds in the account")
-	ErrInvalidOrderNumber = errors.New("invalid order number")
 )
 
 type User struct {
@@ -30,56 +32,73 @@ type User struct {
 }
 
 type Data struct {
-	ID        string
-	UserID    string
-	Name      string
-	Type      string
-	Data      []byte
-	IsChunked bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          string
+	UserID      string
+	Name        string
+	Type        string
+	SizeInBytes uint64
+	Status      Status
+	Data        []byte
+	IsChunked   bool
+	ExternalID  *string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 func (d Data) SerializeToProtobuf() *pb.GetDataBatchResponse_Data {
 	return &pb.GetDataBatchResponse_Data{
-		Id:        d.ID,
-		Name:      d.Name,
-		Type:      d.Type,
-		Data:      d.Data,
-		IsChunked: d.IsChunked,
+		Id:          d.ID,
+		Name:        d.Name,
+		Type:        d.Type,
+		SizeInBytes: d.SizeInBytes,
+		Data:        d.Data,
+		IsChunked:   d.IsChunked,
 	}
 }
 
-type DataChunk struct {
-	buf    *bytes.Buffer
-	isLast bool
+type DataChunkBuffer struct {
+	buf   bytes.Buffer
+	isEOF bool
+	mu    sync.Mutex
 }
 
-func NewDataChunk(buf []byte) *DataChunk {
-	return &DataChunk{
-		buf:    bytes.NewBuffer(buf),
-		isLast: false,
+func NewDataChunkBuffer() *DataChunkBuffer {
+	return &DataChunkBuffer{
+		buf:   bytes.Buffer{},
+		isEOF: false,
+		mu:    sync.Mutex{},
 	}
 }
 
-func (dc *DataChunk) Read(p []byte) (n int, err error) {
-	n, err = dc.buf.Read(p)
+func (dcb *DataChunkBuffer) Read(p []byte) (n int, err error) {
+	dcb.mu.Lock()
+
+	n, err = dcb.buf.Read(p)
 
 	if n == 0 || err == io.EOF {
-		if dc.isLast {
+		if dcb.isEOF {
 			return n, err
 		}
 
-		n, err = dc.Read(p)
+		dcb.mu.Unlock()
+
+		n, err = dcb.Read(p)
 	}
 
+	dcb.mu.Unlock()
 	return n, err
 }
 
-func (dc *DataChunk) Write(p []byte) (n int, err error) {
-	return dc.buf.Write(p)
+func (dcb *DataChunkBuffer) Write(p []byte) (n int, err error) {
+	dcb.mu.Lock()
+	defer dcb.mu.Unlock()
+
+	return dcb.buf.Write(p)
 }
 
-func (dc *DataChunk) SetIsLast() {
-	dc.isLast = true
+func (dcb *DataChunkBuffer) SetIsEOF() {
+	dcb.mu.Lock()
+	defer dcb.mu.Unlock()
+
+	dcb.isEOF = true
 }

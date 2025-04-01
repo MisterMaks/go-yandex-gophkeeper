@@ -24,8 +24,7 @@ const (
 	UserUnauthorizedMessage = "User unauthorized"
 	InternalErrorMessage    = "Internal error"
 
-	StatusUploaded  = "uploaded"
-	StatusUploading = "uploading"
+	ChunkSize uint = 1024 * 1024
 )
 
 // UsecaseInterface contains the necessary functions for the business logic of app.
@@ -34,11 +33,10 @@ type UsecaseInterface interface {
 	Login(ctx context.Context, login, password string) (*domain.User, error)
 
 	CreateData(ctx context.Context, userID string, name string, dataType string, sizeInBytes uint64, data []byte) (*domain.Data, error)
-	CreateDataChunk(ctx context.Context, userID string, id string, dataChunk *domain.DataChunk) error
-	SetDataStatus(ctx context.Context, userID string, id string, status string) error
-	GetDataBatch(ctx context.Context, userID string, dataTypes []string) ([]*domain.Data, error)
-	GetDataChunk(ctx context.Context, userID string, id string) ([]byte, error)
-	UpdateData(ctx context.Context, userID string, id string, name string, dataType string, data []byte) (*domain.Data, error)
+	CreateChunkedData(ctx context.Context, userID string, id string, dataChunkBuffer *domain.DataChunkBuffer) error
+	GetDataBatch(ctx context.Context, userID string) ([]*domain.Data, error)
+	GetDataChunkReader(ctx context.Context, userID string, id string) (io.Reader, error)
+	UpdateData(ctx context.Context, userID string, id string, name string, dataType string, sizeInBytes uint64, data []byte) (*domain.Data, error)
 	DeleteData(ctx context.Context, userID string, id string) (*domain.Data, error)
 }
 
@@ -141,7 +139,7 @@ func (h *GRPCHandler) CreateData(ctx context.Context, in *pb.CreateDataRequest) 
 }
 
 // GetDataBatch gets data batch.
-func (h *GRPCHandler) GetDataBatch(ctx context.Context, in *pb.GetDataBatchRequest) (*pb.GetDataBatchResponse, error) {
+func (h *GRPCHandler) GetDataBatch(ctx context.Context, _ *pb.GetDataBatchRequest) (*pb.GetDataBatchResponse, error) {
 	handlerLogger := logger.GetContextLogger(ctx)
 
 	handlerLogger.Info("Get data batch")
@@ -157,7 +155,6 @@ func (h *GRPCHandler) GetDataBatch(ctx context.Context, in *pb.GetDataBatchReque
 	batch, err := h.usecase.GetDataBatch(
 		ctx,
 		userID,
-		in.Types,
 	)
 	if err != nil {
 		handlerLogger.Error("Failed to get login/password batch",
@@ -196,6 +193,7 @@ func (h *GRPCHandler) UpdateData(ctx context.Context, in *pb.UpdateDataRequest) 
 		in.Id,
 		in.Name,
 		in.Type,
+		in.SizeInBytes,
 		in.Data,
 	)
 	if err != nil {
@@ -254,7 +252,7 @@ func (h *GRPCHandler) CreateDataChunk(stream pb.GoYandexGophkeeper_CreateDataChu
 	}
 
 	isFirstChunk := true
-	var dataChunk *domain.DataChunk
+	dataChunkBuffer := domain.NewDataChunkBuffer()
 	wg := sync.WaitGroup{}
 	errChan := make(chan error)
 
@@ -262,21 +260,13 @@ func (h *GRPCHandler) CreateDataChunk(stream pb.GoYandexGophkeeper_CreateDataChu
 		chunk, err := stream.Recv()
 
 		if err == io.EOF {
-			dataChunk.SetIsLast()
+			dataChunkBuffer.SetIsEOF()
 
 			wg.Wait()
 
 			err = <-errChan
 			if err != nil {
 				return err
-			}
-
-			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploaded)
-			if err != nil {
-				handlerLogger.Error("Failed to set data status",
-					zap.Error(err),
-				)
-				return status.Error(codes.Internal, InternalErrorMessage)
 			}
 
 			return stream.SendAndClose(&pb.CreateDataChunkResponse{})
@@ -291,22 +281,11 @@ func (h *GRPCHandler) CreateDataChunk(stream pb.GoYandexGophkeeper_CreateDataChu
 		}
 
 		if isFirstChunk {
-			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploading)
-			if err != nil {
-				handlerLogger.Error("Failed to set data status",
-					zap.Error(err),
-				)
-
-				return status.Error(codes.Internal, InternalErrorMessage)
-			}
-
-			dataChunk = domain.NewDataChunk(chunk.DataChunk)
-
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 
-				err = h.usecase.CreateDataChunk(ctx, userID, chunk.Id, dataChunk)
+				err = h.usecase.CreateChunkedData(ctx, userID, chunk.Id, dataChunkBuffer)
 
 				if err != nil {
 					handlerLogger.Error("Failed to create data chunk",
@@ -322,7 +301,7 @@ func (h *GRPCHandler) CreateDataChunk(stream pb.GoYandexGophkeeper_CreateDataChu
 			isFirstChunk = false
 		}
 
-		_, err = dataChunk.Write(chunk.DataChunk)
+		_, err = dataChunkBuffer.Write(chunk.DataChunk)
 		if err != nil {
 			handlerLogger.Error("Failed to write data chunk to data chunk buffer",
 				zap.Error(err),
@@ -349,9 +328,12 @@ func (h *GRPCHandler) GetDataChunk(in *pb.GetDataChunkRequest, stream pb.GoYande
 		return status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
 	}
 
-	for {
-		chunk, err := h.usecase.GetDataChunk(ctx, userID, in.Id)
+	reader, err := h.usecase.GetDataChunkReader(ctx, userID, in.Id)
 
+	for {
+		buffer := make([]byte, 0, ChunkSize)
+
+		_, err := reader.Read(buffer)
 		if err == io.EOF {
 			return nil
 		}
@@ -363,7 +345,7 @@ func (h *GRPCHandler) GetDataChunk(in *pb.GetDataChunkRequest, stream pb.GoYande
 			return status.Error(codes.Internal, InternalErrorMessage)
 		}
 
-		err = stream.Send(&pb.GetDataChunkResponse{DataChunk: chunk})
+		err = stream.Send(&pb.GetDataChunkResponse{DataChunk: buffer})
 		if err != nil {
 			handlerLogger.Error("Failed to send data chunk in stream",
 				zap.Error(err),
@@ -390,7 +372,7 @@ func (h *GRPCHandler) UpdateDataChunk(stream pb.GoYandexGophkeeper_UpdateDataChu
 	}
 
 	isFirstChunk := true
-	var dataChunk *domain.DataChunk
+	dataChunkBuffer := domain.NewDataChunkBuffer()
 	wg := sync.WaitGroup{}
 	errChan := make(chan error)
 
@@ -398,21 +380,13 @@ func (h *GRPCHandler) UpdateDataChunk(stream pb.GoYandexGophkeeper_UpdateDataChu
 		chunk, err := stream.Recv()
 
 		if err == io.EOF {
-			dataChunk.SetIsLast()
+			dataChunkBuffer.SetIsEOF()
 
 			wg.Wait()
 
 			err = <-errChan
 			if err != nil {
 				return err
-			}
-
-			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploaded)
-			if err != nil {
-				handlerLogger.Error("Failed to set data status",
-					zap.Error(err),
-				)
-				return status.Error(codes.Internal, InternalErrorMessage)
 			}
 
 			return stream.SendAndClose(&pb.UpdateDataChunkResponse{})
@@ -426,21 +400,11 @@ func (h *GRPCHandler) UpdateDataChunk(stream pb.GoYandexGophkeeper_UpdateDataChu
 		}
 
 		if isFirstChunk {
-			err = h.usecase.SetDataStatus(ctx, userID, chunk.Id, StatusUploading)
-			if err != nil {
-				handlerLogger.Error("Failed to set data status",
-					zap.Error(err),
-				)
-				return status.Error(codes.Internal, InternalErrorMessage)
-			}
-
-			dataChunk = domain.NewDataChunk(chunk.DataChunk)
-
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 
-				err = h.usecase.CreateDataChunk(ctx, userID, chunk.Id, dataChunk)
+				err = h.usecase.CreateChunkedData(ctx, userID, chunk.Id, dataChunkBuffer)
 
 				if err != nil {
 					handlerLogger.Error("Failed to create data chunk",
@@ -456,7 +420,7 @@ func (h *GRPCHandler) UpdateDataChunk(stream pb.GoYandexGophkeeper_UpdateDataChu
 			isFirstChunk = false
 		}
 
-		_, err = dataChunk.Write(chunk.DataChunk)
+		_, err = dataChunkBuffer.Write(chunk.DataChunk)
 		if err != nil {
 			handlerLogger.Error("Failed to write data chunk to data chunk buffer",
 				zap.Error(err),

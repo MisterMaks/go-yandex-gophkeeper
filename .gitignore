@@ -9,3 +9,5 @@
 bin/
 
 local_config.json
+
+deployments/volumes/
