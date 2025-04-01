@@ -12,6 +12,7 @@ import (
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/domain"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/minio/minio-go/v7"
 )
 
 // PostgresStorageInterface contains the necessary functions for the postgres storage logic of app.
@@ -55,17 +56,17 @@ type PostgresStorageInterface interface {
 	) (*domain.Data, error)
 }
 
-// S3StorageInterface contains the necessary functions for the S3 storage logic of app.
-type S3StorageInterface interface {
-	GetObject(ctx context.Context, objectName string) (io.Reader, error)
-	PutObject(ctx context.Context, objectName string, reader io.Reader, objectSize int64) error
+// MinioStorageInterface contains the necessary functions for the S3 storage logic of app.
+type MinioStorageInterface interface {
+	GetObject(ctx context.Context, objectName string) (*minio.Object, error)
+	PutObject(ctx context.Context, objectName string, reader io.Reader, objectSize int64) (minio.UploadInfo, error)
 	RemoveObject(ctx context.Context, objectName string) error
 }
 
 // Usecase is the business logic of app.
 type Usecase struct {
 	postgresStorage PostgresStorageInterface
-	s3Storage       S3StorageInterface
+	minioStorage    MinioStorageInterface
 
 	passwordKey       string
 	minLoginLength    uint
@@ -75,14 +76,14 @@ type Usecase struct {
 // NewUsecase creates new Usecase.
 func NewUsecase(
 	postgresStorage PostgresStorageInterface,
-	s3Storage S3StorageInterface,
+	minioStorage MinioStorageInterface,
 	passwordKey string,
 	minLoginLength uint,
 	minPasswordLength uint,
 ) *Usecase {
 	return &Usecase{
 		postgresStorage: postgresStorage,
-		s3Storage:       s3Storage,
+		minioStorage:    minioStorage,
 
 		passwordKey:       passwordKey,
 		minLoginLength:    minLoginLength,
@@ -198,7 +199,7 @@ func (u *Usecase) CreateChunkedData(ctx context.Context, userID string, id strin
 		return err
 	}
 
-	err = u.s3Storage.PutObject(ctx, id, dataChunkBuffer, int64(data.SizeInBytes))
+	_, err = u.minioStorage.PutObject(ctx, id, dataChunkBuffer, int64(data.SizeInBytes))
 	if err != nil {
 		return err
 	}
@@ -249,7 +250,7 @@ func (u *Usecase) GetDataChunkReader(ctx context.Context, userID string, id stri
 		return nil, err
 	}
 
-	return u.s3Storage.GetObject(ctx, d.ID)
+	return u.minioStorage.GetObject(ctx, d.ID)
 }
 
 // UpdateData updates data.
@@ -270,7 +271,7 @@ func (u *Usecase) DeleteData(ctx context.Context, userID string, id string) (*do
 	}
 
 	if d.ExternalID != nil {
-		err = u.s3Storage.RemoveObject(ctx, *d.ExternalID)
+		err = u.minioStorage.RemoveObject(ctx, *d.ExternalID)
 		if err != nil {
 			return nil, err
 		}
