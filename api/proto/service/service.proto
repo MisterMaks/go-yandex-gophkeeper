@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package service_2;
+package service;
 
-option go_package = "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service_2";
+option go_package = "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service";
 
 service GoYandexGophkeeper {
   rpc Register(RegisterRequest) returns (RegisterResponse);
@@ -12,9 +12,9 @@ service GoYandexGophkeeper {
   rpc GetDataBatch(GetDataBatchRequest) returns (GetDataBatchResponse);
   rpc UpdateData(UpdateDataRequest) returns (UpdateDataResponse);
   rpc DeleteData(DeleteDataRequest) returns (DeleteDataResponse);
-  rpc CreateDataChunk(stream CreateDataChunkRequest) returns (CreateDataChunkResponse);
-  rpc GetDataChunk(GetDataChunkRequest) returns (stream GetDataChunkResponse);
-  rpc UpdateDataChunk(stream UpdateDataChunkRequest) returns (UpdateDataChunkResponse);
+//  rpc CreateChunkedData(stream CreateChunkedDataRequest) returns (CreateChunkedDataResponse);
+//  rpc GetChunkedData(GetChunkedDataRequest) returns (stream GetChunkedDataResponse);
+//  rpc UpdateChunkedData(stream UpdateChunkedDataRequest) returns (UpdateChunkedDataResponse);
 }
 
 message RegisterRequest {
@@ -25,8 +25,7 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-  bytes public_key = 1;
-  bytes private_key_cipher = 2;
+  string access_token = 1;
 }
 
 message LoginRequest {
@@ -37,6 +36,7 @@ message LoginRequest {
 message LoginResponse {
   bytes public_key = 1;
   bytes private_key_cipher = 2;
+  string access_token = 3;
 }
 
 enum Type {
@@ -49,7 +49,6 @@ enum Type {
 message CreateDataRequest {
   string name = 1;
   Type type = 2;
-  uint64 size_in_bytes = 3;
   bytes data = 4;
 }
 
@@ -64,9 +63,7 @@ message GetDataBatchResponse {
     string id = 1;
     string name = 2;
     Type type = 3;
-    uint64 size_in_bytes = 4;
     bytes data = 5;
-    bool is_chunked = 6;
   }
 
   repeated Data data_batch = 1;
@@ -76,7 +73,6 @@ message UpdateDataRequest {
   string id = 1;
   string name = 2;
   Type type = 3;
-  uint64 size_in_bytes = 4;
   bytes data = 5;
 }
 
@@ -88,24 +84,41 @@ message DeleteDataRequest {
 
 message DeleteDataResponse {}
 
-message CreateDataChunkRequest {
-  string id = 1;
+message CreateChunkedDataRequest {
+  message MetaData {
+    string name = 1;
+    Type type = 2;
+    int64 size_in_bytes = 3;
+    bytes data = 4;
+  }
+
+  optional MetaData meta_data = 1;
   bytes data_chunk = 2;
 }
 
-message CreateDataChunkResponse {}
-
-message GetDataChunkRequest {
+message CreateChunkedDataResponse {
   string id = 1;
 }
 
-message GetDataChunkResponse {
+message GetChunkedDataRequest {
+  string id = 1;
+}
+
+message GetChunkedDataResponse {
   bytes data_chunk = 1;
 }
 
-message UpdateDataChunkRequest {
-  string id = 1;
+message UpdateChunkedDataRequest {
+  message MetaData {
+    string id = 1;
+    string name = 2;
+    Type type = 3;
+    int64 size_in_bytes = 4;
+    bytes data = 5;
+  }
+
+  optional MetaData meta_data = 1;
   bytes data_chunk = 2;
 }
 
-message UpdateDataChunkResponse {}
+message UpdateChunkedDataResponse {}

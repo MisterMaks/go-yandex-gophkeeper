@@ -52,7 +52,7 @@ func generateRequestID() string {
 	return id.String()
 }
 
-// RequestLoggerUnaryInterceptor is logger unary interceptor for app.
+// RequestLoggerUnaryInterceptor is logger unary interceptor for grpc handlers.
 func RequestLoggerUnaryInterceptor(ctx context.Context, req any, si *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 	requestID := generateRequestID()
 	Log.Info("got incoming GRPC request",

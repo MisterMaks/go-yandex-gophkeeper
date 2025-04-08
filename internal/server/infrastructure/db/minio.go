@@ -9,12 +9,13 @@ import (
 
 const BucketName = "go-yandex-gophkeeper-bucket"
 
+// MinioStorage is S3 storage for large data.
 type MinioStorage struct {
 	client *minio.Client
 }
 
-func NewMinioStorage(client *minio.Client) (*MinioStorage, error) {
-	return &MinioStorage{client: client}, nil
+func NewMinioStorage(client *minio.Client) *MinioStorage {
+	return &MinioStorage{client: client}
 }
 
 func (m *MinioStorage) GetObject(ctx context.Context, objectName string) (*minio.Object, error) {

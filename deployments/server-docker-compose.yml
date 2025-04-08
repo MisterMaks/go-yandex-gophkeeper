@@ -32,14 +32,32 @@ services:
       - type: bind
         source: ./volumes/etc/default/minio
         target: /etc/config.env
+  minio1-create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio1
+    entrypoint: |
+      bash -c "
+        mc alias set go-yandex-gophkeeper http://minio1:9000 go_yandex_gophkeeper_minio_user go_yandex_gophkeeper_minio_password
+        mc mb go-yandex-gophkeeper/go_yandex_gophkeeper_bucket
+      "
   go-yandex-gophkeeper-server:
     build:
       context: ../.
       dockerfile: build/server.Dockerfile
     environment:
-      LOG_LEVEL: "info"
-      DATABASE_URI: "host=postgres user=go_yandex_gophkeeper_db_user password=go_yandex_gophkeeper_db_password dbname=go_yandex_gophkeeper_db_name port=5432"
+      GRPC_ADDRESS: ":8080"
+      LOG_LEVEL: "debug"
+      POSTGRES_DSN: "host=postgres user=go_yandex_gophkeeper_db_user password=go_yandex_gophkeeper_db_password dbname=go_yandex_gophkeeper_db_name port=5432"
+      PASSWORD_KEY: "a2d3c0ac2cd00c629246b01c6407a535"
+      TOKEN_KEY: "a2d3c0ac2cd00c629246b01c6407a535"
+      TOKEN_EXPIRATION: "10m"
+      MINIO_ENDPOINT: minio1:9000
+      MINIO_ACCESS_KEY: go_yandex_gophkeeper_minio_user
+      MINIO_SECRET_KEY: go_yandex_gophkeeper_minio_password
+      MINIO_BUCKET_NAME: go_yandex_gophkeeper_bucket
     ports:
       - 8080:8080
     depends_on:
       - postgres
+      - minio1-create-bucket

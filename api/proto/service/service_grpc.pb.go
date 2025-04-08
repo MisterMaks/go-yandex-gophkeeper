@@ -4,7 +4,7 @@
 // - protoc             v5.29.2
 // source: api/proto/service/service.proto
 
-package service_2
+package service
 
 import (
 	context "context"
@@ -19,15 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GoYandexGophkeeper_Register_FullMethodName        = "/service_2.GoYandexGophkeeper/Register"
-	GoYandexGophkeeper_Login_FullMethodName           = "/service_2.GoYandexGophkeeper/Login"
-	GoYandexGophkeeper_CreateData_FullMethodName      = "/service_2.GoYandexGophkeeper/CreateData"
-	GoYandexGophkeeper_GetDataBatch_FullMethodName    = "/service_2.GoYandexGophkeeper/GetDataBatch"
-	GoYandexGophkeeper_UpdateData_FullMethodName      = "/service_2.GoYandexGophkeeper/UpdateData"
-	GoYandexGophkeeper_DeleteData_FullMethodName      = "/service_2.GoYandexGophkeeper/DeleteData"
-	GoYandexGophkeeper_CreateDataChunk_FullMethodName = "/service_2.GoYandexGophkeeper/CreateDataChunk"
-	GoYandexGophkeeper_GetDataChunk_FullMethodName    = "/service_2.GoYandexGophkeeper/GetDataChunk"
-	GoYandexGophkeeper_UpdateDataChunk_FullMethodName = "/service_2.GoYandexGophkeeper/UpdateDataChunk"
+	GoYandexGophkeeper_Register_FullMethodName     = "/service.GoYandexGophkeeper/Register"
+	GoYandexGophkeeper_Login_FullMethodName        = "/service.GoYandexGophkeeper/Login"
+	GoYandexGophkeeper_CreateData_FullMethodName   = "/service.GoYandexGophkeeper/CreateData"
+	GoYandexGophkeeper_GetDataBatch_FullMethodName = "/service.GoYandexGophkeeper/GetDataBatch"
+	GoYandexGophkeeper_UpdateData_FullMethodName   = "/service.GoYandexGophkeeper/UpdateData"
+	GoYandexGophkeeper_DeleteData_FullMethodName   = "/service.GoYandexGophkeeper/DeleteData"
 )
 
 // GoYandexGophkeeperClient is the client API for GoYandexGophkeeper service.
@@ -40,9 +37,6 @@ type GoYandexGophkeeperClient interface {
 	GetDataBatch(ctx context.Context, in *GetDataBatchRequest, opts ...grpc.CallOption) (*GetDataBatchResponse, error)
 	UpdateData(ctx context.Context, in *UpdateDataRequest, opts ...grpc.CallOption) (*UpdateDataResponse, error)
 	DeleteData(ctx context.Context, in *DeleteDataRequest, opts ...grpc.CallOption) (*DeleteDataResponse, error)
-	CreateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateDataChunkRequest, CreateDataChunkResponse], error)
-	GetDataChunk(ctx context.Context, in *GetDataChunkRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetDataChunkResponse], error)
-	UpdateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateDataChunkRequest, UpdateDataChunkResponse], error)
 }
 
 type goYandexGophkeeperClient struct {
@@ -113,51 +107,6 @@ func (c *goYandexGophkeeperClient) DeleteData(ctx context.Context, in *DeleteDat
 	return out, nil
 }
 
-func (c *goYandexGophkeeperClient) CreateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateDataChunkRequest, CreateDataChunkResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[0], GoYandexGophkeeper_CreateDataChunk_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[CreateDataChunkRequest, CreateDataChunkResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_CreateDataChunkClient = grpc.ClientStreamingClient[CreateDataChunkRequest, CreateDataChunkResponse]
-
-func (c *goYandexGophkeeperClient) GetDataChunk(ctx context.Context, in *GetDataChunkRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetDataChunkResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[1], GoYandexGophkeeper_GetDataChunk_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[GetDataChunkRequest, GetDataChunkResponse]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_GetDataChunkClient = grpc.ServerStreamingClient[GetDataChunkResponse]
-
-func (c *goYandexGophkeeperClient) UpdateDataChunk(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateDataChunkRequest, UpdateDataChunkResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &GoYandexGophkeeper_ServiceDesc.Streams[2], GoYandexGophkeeper_UpdateDataChunk_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[UpdateDataChunkRequest, UpdateDataChunkResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateDataChunkClient = grpc.ClientStreamingClient[UpdateDataChunkRequest, UpdateDataChunkResponse]
-
 // GoYandexGophkeeperServer is the server API for GoYandexGophkeeper service.
 // All implementations must embed UnimplementedGoYandexGophkeeperServer
 // for forward compatibility.
@@ -168,9 +117,6 @@ type GoYandexGophkeeperServer interface {
 	GetDataBatch(context.Context, *GetDataBatchRequest) (*GetDataBatchResponse, error)
 	UpdateData(context.Context, *UpdateDataRequest) (*UpdateDataResponse, error)
 	DeleteData(context.Context, *DeleteDataRequest) (*DeleteDataResponse, error)
-	CreateDataChunk(grpc.ClientStreamingServer[CreateDataChunkRequest, CreateDataChunkResponse]) error
-	GetDataChunk(*GetDataChunkRequest, grpc.ServerStreamingServer[GetDataChunkResponse]) error
-	UpdateDataChunk(grpc.ClientStreamingServer[UpdateDataChunkRequest, UpdateDataChunkResponse]) error
 	mustEmbedUnimplementedGoYandexGophkeeperServer()
 }
 
@@ -198,15 +144,6 @@ func (UnimplementedGoYandexGophkeeperServer) UpdateData(context.Context, *Update
 }
 func (UnimplementedGoYandexGophkeeperServer) DeleteData(context.Context, *DeleteDataRequest) (*DeleteDataResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteData not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) CreateDataChunk(grpc.ClientStreamingServer[CreateDataChunkRequest, CreateDataChunkResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method CreateDataChunk not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) GetDataChunk(*GetDataChunkRequest, grpc.ServerStreamingServer[GetDataChunkResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method GetDataChunk not implemented")
-}
-func (UnimplementedGoYandexGophkeeperServer) UpdateDataChunk(grpc.ClientStreamingServer[UpdateDataChunkRequest, UpdateDataChunkResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method UpdateDataChunk not implemented")
 }
 func (UnimplementedGoYandexGophkeeperServer) mustEmbedUnimplementedGoYandexGophkeeperServer() {}
 func (UnimplementedGoYandexGophkeeperServer) testEmbeddedByValue()                            {}
@@ -337,36 +274,11 @@ func _GoYandexGophkeeper_DeleteData_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoYandexGophkeeper_CreateDataChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GoYandexGophkeeperServer).CreateDataChunk(&grpc.GenericServerStream[CreateDataChunkRequest, CreateDataChunkResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_CreateDataChunkServer = grpc.ClientStreamingServer[CreateDataChunkRequest, CreateDataChunkResponse]
-
-func _GoYandexGophkeeper_GetDataChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetDataChunkRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(GoYandexGophkeeperServer).GetDataChunk(m, &grpc.GenericServerStream[GetDataChunkRequest, GetDataChunkResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_GetDataChunkServer = grpc.ServerStreamingServer[GetDataChunkResponse]
-
-func _GoYandexGophkeeper_UpdateDataChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GoYandexGophkeeperServer).UpdateDataChunk(&grpc.GenericServerStream[UpdateDataChunkRequest, UpdateDataChunkResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type GoYandexGophkeeper_UpdateDataChunkServer = grpc.ClientStreamingServer[UpdateDataChunkRequest, UpdateDataChunkResponse]
-
 // GoYandexGophkeeper_ServiceDesc is the grpc.ServiceDesc for GoYandexGophkeeper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GoYandexGophkeeper_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "service_2.GoYandexGophkeeper",
+	ServiceName: "service.GoYandexGophkeeper",
 	HandlerType: (*GoYandexGophkeeperServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -394,22 +306,6 @@ var GoYandexGophkeeper_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GoYandexGophkeeper_DeleteData_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "CreateDataChunk",
-			Handler:       _GoYandexGophkeeper_CreateDataChunk_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "GetDataChunk",
-			Handler:       _GoYandexGophkeeper_GetDataChunk_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "UpdateDataChunk",
-			Handler:       _GoYandexGophkeeper_UpdateDataChunk_Handler,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "api/proto/service/service.proto",
 }

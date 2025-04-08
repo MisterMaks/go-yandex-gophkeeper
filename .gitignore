@@ -6,8 +6,7 @@
 
 *.out
 
-bin/
-
-local_config.json
+*local_config.json
+api/kreya
 
 deployments/volumes/
