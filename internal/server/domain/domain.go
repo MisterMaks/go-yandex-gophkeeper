@@ -16,9 +16,10 @@ const (
 )
 
 var (
-	ErrLoginTaken                 = errors.New("login already taken")
-	ErrInvalidLoginPassword       = errors.New("invalid login/password")
-	ErrInvalidLoginPasswordFormat = errors.New("invalid login/password format")
+	ErrLoginTaken                    = errors.New("login already taken")
+	ErrInvalidLoginPassword          = errors.New("invalid login/password")
+	ErrInvalidLoginPasswordFormat    = errors.New("invalid login/password format")
+	ErrDataWithThisNameAndTypeExists = errors.New("data with this name and type already exists")
 )
 
 type User struct {

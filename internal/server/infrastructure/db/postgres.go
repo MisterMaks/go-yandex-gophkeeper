@@ -16,7 +16,7 @@ const (
 	CreateUserQuery = `INSERT INTO "user" (login, password_hash, public_key, private_key_cipher) VALUES ($1, $2, $3, $4) RETURNING id;`
 	GetUserQuery    = `SELECT id, login, password_hash, public_key, private_key_cipher FROM "user" WHERE login = $1 AND password_hash = $2;`
 
-	CreateDataQuery   = `INSERT INTO data (user_id, name, type, data) VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at;`
+	CreateDataQuery   = `INSERT INTO data (user_id, name, type, data) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, name, type) DO NOTHING RETURNING id, created_at, updated_at;`
 	GetDataQuery      = `SELECT name, type, data, created_at, updated_at FROM data WHERE user_id = $1 AND id = $2;`
 	GetDataBatchQuery = `SELECT id, name, type, data, created_at, updated_at FROM data WHERE user_id = $1 ORDER BY updated_at DESC;`
 

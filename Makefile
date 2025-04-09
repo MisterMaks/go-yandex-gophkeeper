@@ -76,3 +76,8 @@ test-cover-percentage:
 		-covermode=count \
 		$$(go list ./... | grep -v api/ | grep -v cmd/) && \
 		go tool cover -func cover.out
+
+.PHONY: mockgen-server-usecase
+mockgen-server-usecase:
+	@echo "-- mockgen server usecase"
+	mockgen -destination=internal/server/usecase/mocks/usecase.go -package=mocks -source=internal/server/usecase/usecase.go

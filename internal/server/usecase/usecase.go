@@ -167,6 +167,9 @@ func (u *Usecase) Login(ctx context.Context, login, password string) (*domain.Us
 func (u *Usecase) CreateData(ctx context.Context, userID string, name string, dataType string, data []byte) (*domain.Data, error) {
 	d, err := u.postgresStorage.CreateData(ctx, userID, name, dataType, data)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrDataWithThisNameAndTypeExists
+		}
 		return nil, err
 	}
 

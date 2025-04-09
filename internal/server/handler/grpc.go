@@ -121,6 +121,13 @@ func (h *GRPCHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 
 	user, err := h.usecase.Register(ctx, in.Login, in.Password, in.PublicKey, in.PrivateKeyCipher)
 	if err != nil {
+		switch err {
+		case domain.ErrLoginTaken:
+			return nil, status.Error(codes.AlreadyExists, err.Error())
+		case domain.ErrInvalidLoginPasswordFormat:
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
 		handlerLogger.Error("Failed to register user",
 			zap.Error(err),
 		)
@@ -146,7 +153,14 @@ func (h *GRPCHandler) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Login
 
 	user, err := h.usecase.Login(ctx, in.Login, in.Password)
 	if err != nil {
-		handlerLogger.Error("Failed to register user",
+		if err == domain.ErrInvalidLoginPassword {
+			handlerLogger.Warn("Failed to login user",
+				zap.Error(err),
+			)
+			return nil, status.Error(codes.Unauthenticated, err.Error())
+		}
+
+		handlerLogger.Error("Failed to login user",
 			zap.Error(err),
 		)
 		return nil, status.Error(codes.Internal, InternalErrorMessage)
@@ -194,6 +208,12 @@ func (h *GRPCHandler) CreateData(ctx context.Context, in *pb.CreateDataRequest) 
 		in.Data,
 	)
 	if err != nil {
+		if err == domain.ErrDataWithThisNameAndTypeExists {
+			handlerLogger.Warn("Failed to create data",
+				zap.Error(err),
+			)
+			return nil, status.Error(codes.AlreadyExists, "data with this name and type already exists")
+		}
 		handlerLogger.Error("Failed to create data",
 			zap.Error(err),
 		)
