@@ -11,15 +11,11 @@ const AppName = "go-yandex-gophkeeper-client"
 type Config struct {
 	AppName        string
 	GRPCAddress    string `env:"GRPC_ADDRESS" mapstructure:"grpc_address"`
-	LogLevel       string `env:"LOG_LEVEL" mapstructure:"log_level"`
 	ConfigFilePath string `env:"CONFIG_FILE_PATH"`
-	LogFilePath    string `env:"LOG_FILE_PATH" mapstructure:"log_file_path"`
 }
 
 var DefaultConfig = map[string]interface{}{
-	"grpc_address":  ":8080",
-	"log_level":     "INFO",
-	"log_file_path": "logs.log",
+	"grpc_address": "127.0.0.1:8080",
 }
 
 // New create config.

@@ -11,8 +11,10 @@ import (
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/client/ui"
 	internal_usecase "github.com/MisterMaks/go-yandex-gophkeeper/internal/client/usecase"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 )
+
+const PathToCertificate = "certificates/cert.pem"
 
 var BuildVersion string
 var BuildDate string
@@ -41,7 +43,12 @@ func main() {
 		log.Fatalln("CRITICAL\tFailed to create config. Error:", err)
 	}
 
-	cc, err := grpc.NewClient(config.GRPCAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	tlsCert, err := credentials.NewClientTLSFromFile(PathToCertificate, "")
+	if err != nil {
+		log.Fatalln("Failed to get TLS certificate. Error:", err)
+	}
+
+	cc, err := grpc.NewClient(config.GRPCAddress, grpc.WithTransportCredentials(tlsCert))
 	if err != nil {
 		log.Fatal(err)
 	}

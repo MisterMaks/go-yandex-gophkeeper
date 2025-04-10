@@ -81,3 +81,9 @@ test-cover-percentage:
 mockgen-server-usecase:
 	@echo "-- mockgen server usecase"
 	mockgen -destination=internal/server/usecase/mocks/usecase.go -package=mocks -source=internal/server/usecase/usecase.go
+
+.PHONY: mockgen-server-handler
+mockgen-server-handler:
+	@echo "-- mockgen server usecase"
+	mockgen -destination=internal/server/handler/mocks/usecase.go -package=mocks -source=internal/server/handler/grpc.go
+	mockgen -destination internal/server/handler/mocks/grpc_server.go -package mocks google.golang.org/grpc ServerTransportStream

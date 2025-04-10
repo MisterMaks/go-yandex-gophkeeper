@@ -19,11 +19,14 @@ import (
 	"github.com/pressly/goose/v3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 const (
-	ConfigKey  = "config"
-	AddressKey = "address"
+	ConfigKey         = "config"
+	AddressKey        = "address"
+	PathToCertificate = "certificates/cert.pem"
+	PathToPrivateKey  = "certificates/private_key.pem"
 )
 
 func migrate(dsn string) error {
@@ -130,7 +133,15 @@ func main() {
 		},
 	)
 
+	tlsCert, err := credentials.NewServerTLSFromFile(PathToCertificate, PathToPrivateKey)
+	if err != nil {
+		logger.Log.Fatal("Failed to get server certificate from file",
+			zap.Error(err),
+		)
+	}
+
 	server := grpc.NewServer(
+		grpc.Creds(tlsCert),
 		grpc.ChainUnaryInterceptor(
 			logger.RequestLoggerUnaryInterceptor,
 			handler.AuthenticateUnaryInterceptor,

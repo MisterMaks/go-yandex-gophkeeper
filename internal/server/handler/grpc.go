@@ -10,9 +10,7 @@ import (
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -169,13 +167,6 @@ func (h *GRPCHandler) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Login
 	accessToken, err := h.buildJWTString(user.ID)
 	if err != nil {
 		handlerLogger.Error("Failed to build JWT string", zap.Error(err))
-		return nil, status.Error(codes.Internal, InternalErrorMessage)
-	}
-
-	header := metadata.Pairs(AccessTokenKey, accessToken)
-	err = grpc.SetHeader(ctx, header)
-	if err != nil {
-		handlerLogger.Error("Internal error", zap.Error(err))
 		return nil, status.Error(codes.Internal, InternalErrorMessage)
 	}
 

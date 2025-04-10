@@ -33,8 +33,9 @@ type Config struct {
 	ConfigFilePath string `env:"CONFIG_FILE_PATH"`
 }
 
+// DefaultConfig is default config.
 var DefaultConfig = map[string]interface{}{
-	"grpc_address":        "localhost:8081",
+	"grpc_address":        "127.0.0.1:8080",
 	"password_key":        "",
 	"min_login_length":    0,
 	"min_password_length": 0,
