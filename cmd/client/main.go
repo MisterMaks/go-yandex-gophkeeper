@@ -4,10 +4,10 @@ import (
 	"log"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
-	internal_config "github.com/MisterMaks/go-yandex-gophkeeper/internal/client/config"
+	"github.com/MisterMaks/go-yandex-gophkeeper/internal/client/config"
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/client/infrastructure/client"
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/client/ui"
-	internal_usecase "github.com/MisterMaks/go-yandex-gophkeeper/internal/client/usecase"
+	"github.com/MisterMaks/go-yandex-gophkeeper/internal/client/usecase"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -34,7 +34,7 @@ func printBuildInfo() {
 func main() {
 	printBuildInfo()
 
-	config, err := internal_config.New()
+	c, err := config.New()
 	if err != nil {
 		log.Fatalln("CRITICAL\tFailed to create config. Error:", err)
 	}
@@ -44,17 +44,17 @@ func main() {
 		log.Fatalln("Failed to get TLS certificate. Error:", err)
 	}
 
-	cc, err := grpc.NewClient(config.GRPCAddress, grpc.WithTransportCredentials(tlsCert))
+	grpcClient, err := grpc.NewClient(c.GRPCAddress, grpc.WithTransportCredentials(tlsCert))
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer cc.Close()
+	defer grpcClient.Close()
 
-	c := pb.NewGoYandexGophkeeperClient(cc)
-	gophkeeperClient := client.NewGophkeeperClient(c)
-	usecase := internal_usecase.NewUsecase(gophkeeperClient)
+	grpcServiceClient := pb.NewGoYandexGophkeeperClient(grpcClient)
+	gophkeeperClient := client.NewGophkeeperClient(grpcServiceClient)
+	u := usecase.NewUsecase(gophkeeperClient)
 
-	tui := ui.NewTUI(usecase)
+	tui := ui.NewTUI(u)
 	err = tui.Run()
 	if err != nil {
 		log.Fatalln("Failed to run client")
