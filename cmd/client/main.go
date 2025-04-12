@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
@@ -20,18 +19,16 @@ var BuildDate string
 
 func printBuildInfo() {
 	if BuildVersion == "" {
-		fmt.Println("Build version: N/A")
+		log.Println("Build version: N/A")
 	} else {
-		fmt.Println("Build version:", BuildVersion)
+		log.Println("Build version:", BuildVersion)
 	}
 
 	if BuildDate == "" {
-		fmt.Println("Build date: N/A")
+		log.Println("Build date: N/A")
 	} else {
-		fmt.Println("Build date:", BuildDate)
+		log.Println("Build date:", BuildDate)
 	}
-
-	fmt.Println()
 }
 
 func main() {
@@ -49,7 +46,7 @@ func main() {
 
 	cc, err := grpc.NewClient(config.GRPCAddress, grpc.WithTransportCredentials(tlsCert))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	defer cc.Close()
 
