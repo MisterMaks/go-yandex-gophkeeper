@@ -17,13 +17,6 @@ var EncryptedDataTypes = map[string]struct{}{
 	BankCardDataType:      {},
 }
 
-var DataTypeStructs = map[string]interface{}{
-	LoginPasswordDataType: LoginPassword{},
-	BankCardDataType:      BankCard{},
-	TextDataType:          Text{},
-	BinaryDataType:        Binary{},
-}
-
 type LoginPassword struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
