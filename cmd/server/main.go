@@ -10,9 +10,9 @@ import (
 	"syscall"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
-	internal_config "github.com/MisterMaks/go-yandex-gophkeeper/internal/server/config"
-	internal_handler "github.com/MisterMaks/go-yandex-gophkeeper/internal/server/handler"
-	internal_db "github.com/MisterMaks/go-yandex-gophkeeper/internal/server/infrastructure/db"
+	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/config"
+	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/handler"
+	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/infrastructure/db"
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/logger"
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/usecase"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -63,29 +63,29 @@ func connectPostgres(dsn string) (*sql.DB, error) {
 }
 
 func main() {
-	config, err := internal_config.New()
+	c, err := config.New()
 	if err != nil {
 		log.Fatalln("CRITICAL\tFailed to create config. Error:", err)
 	}
 
-	err = logger.New(config.LogLevel)
+	err = logger.New(c.LogLevel)
 	if err != nil {
 		log.Fatalln("CRITICAL\tFailed to init logger. Error:", err)
 	}
 
 	logger.Log.Debug("Config data",
-		zap.Any(ConfigKey, config),
+		zap.Any(ConfigKey, c),
 	)
 
 	logger.Log.Info("Applying migrations")
-	err = migrate(config.PostgresDSN)
+	err = migrate(c.PostgresDSN)
 	if err != nil {
 		logger.Log.Fatal("Failed to apply migrations",
 			zap.Error(err),
 		)
 	}
 
-	postgresDB, err := connectPostgres(config.PostgresDSN)
+	postgresDB, err := connectPostgres(c.PostgresDSN)
 	if err != nil {
 		logger.Log.Fatal("Failed to connect to Postgres",
 			zap.Error(err),
@@ -100,7 +100,7 @@ func main() {
 		}
 	}()
 
-	postgresStorage := internal_db.NewPostgresStorage(postgresDB)
+	postgresStorage := db.NewPostgresStorage(postgresDB)
 
 	//minioClient, err := minio.New(config.MinioEndpoint, &minio.Options{
 	//	Creds: credentials.NewStaticV4(config.MinioAccessKey, config.MinioSecretKey, ""),
@@ -111,20 +111,20 @@ func main() {
 	//	)
 	//}
 
-	//minioStorage := internal_db.NewMinioStorage(minioClient)
+	//minioStorage := db.NewMinioStorage(minioClient)
 
 	u := usecase.NewUsecase(
 		postgresStorage,
 		nil,
-		config.PasswordKey,
-		config.MinLoginLength,
-		config.MinPasswordLength,
+		c.PasswordKey,
+		c.MinLoginLength,
+		c.MinPasswordLength,
 	)
 
-	handler := internal_handler.NewGRPCHandler(
+	h := handler.NewGRPCHandler(
 		u,
-		config.TokenKey,
-		config.TokenExpiration,
+		c.TokenKey,
+		c.TokenExpiration,
 		[]string{
 			pb.GoYandexGophkeeper_CreateData_FullMethodName,
 			pb.GoYandexGophkeeper_GetDataBatch_FullMethodName,
@@ -144,13 +144,13 @@ func main() {
 		grpc.Creds(tlsCert),
 		grpc.ChainUnaryInterceptor(
 			logger.RequestLoggerUnaryInterceptor,
-			handler.AuthenticateUnaryInterceptor,
+			h.AuthenticateUnaryInterceptor,
 		),
 	)
 
-	pb.RegisterGoYandexGophkeeperServer(server, handler)
+	pb.RegisterGoYandexGophkeeperServer(server, h)
 
-	listen, err := net.Listen("tcp", config.GRPCAddress)
+	listen, err := net.Listen("tcp", c.GRPCAddress)
 	if err != nil {
 		logger.Log.Fatal("Failed to create listen",
 			zap.Error(err),
@@ -158,7 +158,7 @@ func main() {
 	}
 
 	logger.Log.Info("Server running",
-		zap.String(AddressKey, config.GRPCAddress),
+		zap.String(AddressKey, c.GRPCAddress),
 	)
 
 	go func() {
