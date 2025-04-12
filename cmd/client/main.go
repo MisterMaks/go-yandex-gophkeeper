@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
 	internal_config "github.com/MisterMaks/go-yandex-gophkeeper/internal/client/config"
@@ -61,7 +60,6 @@ func main() {
 	tui := ui.NewTUI(usecase)
 	err = tui.Run()
 	if err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
-		os.Exit(1)
+		log.Fatalln("Failed to run client")
 	}
 }
