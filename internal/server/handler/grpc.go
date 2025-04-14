@@ -193,7 +193,7 @@ func (h *GRPCHandler) CreateData(ctx context.Context, in *pb.CreateDataRequest) 
 		in.GetData(),
 	)
 	if err != nil {
-		if err == domain.ErrDataWithThisNameAndTypeExists {
+		if errors.Is(err, domain.ErrDataWithThisNameAndTypeExists) {
 			handlerLogger.Warn("Failed to create data",
 				zap.Error(err),
 			)
