@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -144,7 +145,7 @@ func (h *GRPCHandler) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Login
 
 	user, err := h.usecase.Login(ctx, in.GetLogin(), in.GetPassword())
 	if err != nil {
-		if err == domain.ErrInvalidLoginPassword {
+		if errors.Is(err, domain.ErrInvalidLoginPassword) {
 			handlerLogger.Warn("Failed to login user",
 				zap.Error(err),
 			)
