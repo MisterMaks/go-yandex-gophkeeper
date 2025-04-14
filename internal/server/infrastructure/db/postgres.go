@@ -83,7 +83,13 @@ func (ps *PostgresStorage) CreateData(ctx context.Context, userID, name, dataTyp
 		return nil, err
 	}
 
-	query := `INSERT INTO data (user_id, name, type, data) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, name, type) DO NOTHING RETURNING id, created_at, updated_at;`
+	query := `INSERT INTO data (user_id, name, type, data) 
+VALUES ($1, $2, $3, $4) 
+ON CONFLICT (user_id, name, type) 
+DO UPDATE SET
+  data = EXCLUDED.data,
+  updated_at = NOW()
+RETURNING id, created_at, updated_at;`
 
 	row := ps.db.QueryRowContext(
 		ctx,
