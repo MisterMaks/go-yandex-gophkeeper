@@ -33,23 +33,17 @@ func (m *HomeModel) Init() tea.Cmd {
 
 func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	// Is it a key press?
 	case tea.KeyMsg:
-
-		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
-		// These keys should exit the program.
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
 		case "up", "k":
 			if m.cursor > 0 {
 				m.cursor--
 			}
 
-		// The "down" and "j" keys move the cursor down
 		case "down", "j":
 			if m.cursor < len(m.dataBatch)-1 {
 				m.cursor++
@@ -104,16 +98,13 @@ func (m *HomeModel) View() string {
 		m.isUpdatedModel = true
 	}
 
-	// The header
 	s := "Data\n\n"
 
-	// Iterate over our choices
 	for i, data := range m.dataBatch {
 
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
+		cursor := " "
 		if m.cursor == i {
-			cursor = ">" // cursor!
+			cursor = ">"
 		}
 
 		printData := string(data.Data)
@@ -123,7 +114,6 @@ func (m *HomeModel) View() string {
 			continue
 		}
 
-		// Render the row
 		s += fmt.Sprintf("%s %s %s %s %s\n", cursor, data.ID, data.Name, data.Type, printData)
 	}
 
@@ -131,10 +121,8 @@ func (m *HomeModel) View() string {
 		s += m.err.Error() + "\n"
 	}
 
-	// The footer
 	s += "\nr refresh | n new data | d delete | q quit\n"
 
-	// Send the UI for rendering
 	return s
 }
 

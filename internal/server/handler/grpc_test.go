@@ -54,7 +54,6 @@ func TestGRPCHandler_Register(t *testing.T) {
 		PrivateKeyCipher: privateKeyCipher,
 	}
 
-	// создаём контроллер
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -139,7 +138,6 @@ func TestGRPCHandler_Login(t *testing.T) {
 		PrivateKeyCipher: privateKeyCipher,
 	}
 
-	// создаём контроллер
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

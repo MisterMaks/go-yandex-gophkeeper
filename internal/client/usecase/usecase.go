@@ -86,7 +86,7 @@ func (u *Usecase) Register(ctx context.Context, login, password string) error {
 	}
 
 	nonce := key[len(key)-aesgcm.NonceSize():]
-	privateKeyCipher := aesgcm.Seal(nil, nonce, privateKeyPEM.Bytes(), nil) // зашифровываем
+	privateKeyCipher := aesgcm.Seal(nil, nonce, privateKeyPEM.Bytes(), nil)
 	_, err = u.gophkeeperClient.Register(ctx, login, password, publicKeyPEM.Bytes(), privateKeyCipher)
 	if err != nil {
 		return err

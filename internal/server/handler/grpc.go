@@ -91,23 +91,18 @@ func getContextUserID(ctx context.Context) (string, error) {
 
 // buildJWTString creates token and return it in string format.
 func (h *GRPCHandler) buildJWTString(userID string) (string, error) {
-	// создаём новый токен с алгоритмом подписи HS256 и утверждениями — Claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			// когда создан токен
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(h.tokenExp)),
 		},
-		// собственное утверждение
 		UserID: userID,
 	})
 
-	// создаём строку токена
 	tokenString, err := token.SignedString([]byte(h.tokenKey))
 	if err != nil {
 		return "", err
 	}
 
-	// возвращаем строку токена
 	return tokenString, nil
 }
 

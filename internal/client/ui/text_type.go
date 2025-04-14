@@ -38,7 +38,6 @@ func NewTextTypeModel(usecase UsecaseInterface) *TextTypeModel {
 }
 
 func (m TextTypeModel) Init() tea.Cmd {
-	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
 
@@ -90,7 +89,6 @@ func (m TextTypeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.nameInput.Blur()
 		}
 
-	// We handle errors just like any other message
 	case error:
 		m.err = msg
 		return m, nil
@@ -130,7 +128,7 @@ func (m *TextTypeModel) nextInput() {
 // prevInput focuses the previous input field
 func (m *TextTypeModel) prevInput() {
 	m.focused--
-	// Wrap around
+
 	if m.focused < 0 {
 		m.focused = 2 - 1
 	}

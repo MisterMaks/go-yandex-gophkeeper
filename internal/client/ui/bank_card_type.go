@@ -63,7 +63,6 @@ func NewBankCardTypeModel(usecase UsecaseInterface) *BankCardTypeModel {
 }
 
 func (m BankCardTypeModel) Init() tea.Cmd {
-	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
 
@@ -154,7 +153,7 @@ func (m *BankCardTypeModel) nextInput() {
 // prevInput focuses the previous input field
 func (m *BankCardTypeModel) prevInput() {
 	m.focused--
-	// Wrap around
+
 	if m.focused < 0 {
 		m.focused = len(m.inputs) - 1
 	}
