@@ -6,8 +6,8 @@ CREATE TABLE "user" (
     password_hash bytea NOT NULL,
     public_key bytea NOT NULL,
     private_key_cipher bytea NOT NULL,
-    created_at timestamp NOT NULL DEFAULT now(),
-    updated_at timestamp NOT NULL DEFAULT now()
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
 CREATE TABLE data (
@@ -16,8 +16,8 @@ CREATE TABLE data (
     name varchar(64) NOT NULL,
     type varchar(64) NOT NULL CHECK (type IN ('LOGIN_PASSWORD', 'BANK_CARD', 'TEXT', 'BINARY')),
     data bytea,
-    created_at timestamp NOT NULL DEFAULT now(),
-    updated_at timestamp NOT NULL DEFAULT now(),
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now(),
     UNIQUE (user_id, name, type)  -- unique name for type and user
 );
 -- +goose StatementEnd
