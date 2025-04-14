@@ -129,9 +129,9 @@ func (u *Usecase) Register(ctx context.Context, login, password string, publicKe
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		switch {
-		case pgErr.Code == pgerrcode.UniqueViolation && pgErr.Message == "duplicate key value violates unique constraint \"user_login_key\"":
+		case pgErr.Code == pgerrcode.UniqueViolation:
 			return nil, domain.ErrLoginTaken
-		case pgErr.Code == pgerrcode.CheckViolation && pgErr.Message == "new row for relation \"user\" violates check constraint \"user_login_check\"":
+		case pgErr.Code == pgerrcode.CheckViolation:
 			return nil, domain.ErrInvalidLoginPasswordFormat
 		default:
 			return nil, err
