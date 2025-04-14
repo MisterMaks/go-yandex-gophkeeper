@@ -20,6 +20,11 @@ CREATE TABLE data (
     updated_at timestamp with time zone NOT NULL DEFAULT now(),
     UNIQUE (user_id, name, type)  -- unique name for type and user
 );
+
+CREATE INDEX name_index ON data (name);
+CREATE INDEX type_index ON data (type);
+CREATE INDEX created_at_index ON data (created_at);
+CREATE INDEX updated_at_index ON data (updated_at);
 -- +goose StatementEnd
 
 -- +goose Down
