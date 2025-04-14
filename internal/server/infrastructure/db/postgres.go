@@ -87,8 +87,8 @@ func (ps *PostgresStorage) CreateData(ctx context.Context, userID, name, dataTyp
 VALUES ($1, $2, $3, $4) 
 ON CONFLICT (user_id, name, type) 
 DO UPDATE SET
-  data = EXCLUDED.data,
-  updated_at = NOW()
+	data = EXCLUDED.data,
+	updated_at = NOW()
 RETURNING id, created_at, updated_at;`
 
 	row := ps.db.QueryRowContext(
