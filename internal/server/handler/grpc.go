@@ -113,17 +113,15 @@ func (h *GRPCHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 	handlerLogger.Info("Register user")
 
 	user, err := h.usecase.Register(ctx, in.GetLogin(), in.GetLogin(), in.GetPublicKey(), in.GetPrivateKeyCipher())
-	if err != nil {
-		switch err {
-		case domain.ErrLoginTaken:
-			return nil, status.Error(codes.AlreadyExists, err.Error())
-		case domain.ErrInvalidLoginPasswordFormat:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
 
-		handlerLogger.Error("Failed to register user",
-			zap.Error(err),
-		)
+	switch err {
+	case nil:
+	case domain.ErrLoginTaken:
+		return nil, status.Error(codes.AlreadyExists, err.Error())
+	case domain.ErrInvalidLoginPasswordFormat:
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	default:
+		handlerLogger.Error("Failed to register user", zap.Error(err))
 		return nil, status.Error(codes.Internal, InternalErrorMessage)
 	}
 
