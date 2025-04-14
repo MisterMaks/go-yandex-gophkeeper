@@ -29,39 +29,36 @@ type BankCardTypeModel struct {
 	securityCodeInput   *textinput.Model
 }
 
+func createTextInput(placeholder string, charLimit int, width int) *textinput.Model {
+	inp := textinput.New()
+	inp.Placeholder = placeholder
+	inp.CharLimit = charLimit
+	inp.Width = width
+	return &inp
+}
+
 func NewBankCardTypeModel(usecase UsecaseInterface) *BankCardTypeModel {
 	inputs := make([]*textinput.Model, 4)
 
 	nameInput := textinput.New()
 	nameInput.Focus()
 
-	numberInput := textinput.New()
-	numberInput.Placeholder = "4505 **** **** 1234"
-	numberInput.CharLimit = 16
-	numberInput.Width = 16
-
-	expirationDateInput := textinput.New()
-	expirationDateInput.Placeholder = "10/11"
-	expirationDateInput.CharLimit = 5
-	expirationDateInput.Width = 5
-
-	securityCodeInput := textinput.New()
-	securityCodeInput.Placeholder = "123"
-	securityCodeInput.CharLimit = 3
-	securityCodeInput.Width = 3
+	numberInput := createTextInput("1234********1234", 16, 16)
+	expirationDateInput := createTextInput("10/11", 5, 5)
+	securityCodeInput := createTextInput("123", 3, 3)
 
 	inputs[BankCardTypeNameInputIndex] = &nameInput
-	inputs[BankCardTypeNumberInputIndex] = &numberInput
-	inputs[BankCardTypeExpirationDateInputIndex] = &expirationDateInput
-	inputs[BankCardTypeSecurityCodeInputIndex] = &securityCodeInput
+	inputs[BankCardTypeNumberInputIndex] = numberInput
+	inputs[BankCardTypeExpirationDateInputIndex] = expirationDateInput
+	inputs[BankCardTypeSecurityCodeInputIndex] = securityCodeInput
 
 	return &BankCardTypeModel{
 		inputs:              inputs,
 		usecase:             usecase,
 		nameInput:           &nameInput,
-		numberInput:         &numberInput,
-		expirationDateInput: &expirationDateInput,
-		securityCodeInput:   &securityCodeInput,
+		numberInput:         numberInput,
+		expirationDateInput: expirationDateInput,
+		securityCodeInput:   securityCodeInput,
 	}
 }
 
