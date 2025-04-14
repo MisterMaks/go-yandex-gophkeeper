@@ -112,7 +112,7 @@ func (h *GRPCHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 
 	handlerLogger.Info("Register user")
 
-	user, err := h.usecase.Register(ctx, in.Login, in.Password, in.PublicKey, in.PrivateKeyCipher)
+	user, err := h.usecase.Register(ctx, in.GetLogin(), in.GetLogin(), in.GetPublicKey(), in.GetPrivateKeyCipher())
 	if err != nil {
 		switch err {
 		case domain.ErrLoginTaken:
@@ -144,7 +144,7 @@ func (h *GRPCHandler) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Login
 
 	handlerLogger.Info("Login user")
 
-	user, err := h.usecase.Login(ctx, in.Login, in.Password)
+	user, err := h.usecase.Login(ctx, in.GetLogin(), in.GetPassword())
 	if err != nil {
 		if err == domain.ErrInvalidLoginPassword {
 			handlerLogger.Warn("Failed to login user",
@@ -189,9 +189,9 @@ func (h *GRPCHandler) CreateData(ctx context.Context, in *pb.CreateDataRequest) 
 	data, err := h.usecase.CreateData(
 		ctx,
 		userID,
-		in.Name,
-		in.Type.String(),
-		in.Data,
+		in.GetName(),
+		in.GetType().String(),
+		in.GetData(),
 	)
 	if err != nil {
 		if err == domain.ErrDataWithThisNameAndTypeExists {
@@ -261,10 +261,10 @@ func (h *GRPCHandler) UpdateData(ctx context.Context, in *pb.UpdateDataRequest) 
 	_, err = h.usecase.UpdateData(
 		ctx,
 		userID,
-		in.Id,
-		in.Name,
-		in.Type.String(),
-		in.Data,
+		in.GetId(),
+		in.GetName(),
+		in.GetType().String(),
+		in.GetData(),
 	)
 	if err != nil {
 		handlerLogger.Error("Failed to update data",
@@ -293,7 +293,7 @@ func (h *GRPCHandler) DeleteData(ctx context.Context, in *pb.DeleteDataRequest) 
 	_, err = h.usecase.DeleteData(
 		ctx,
 		userID,
-		in.Id,
+		in.GetId(),
 	)
 	if err != nil {
 		handlerLogger.Error("Failed to delete data",
