@@ -16,38 +16,52 @@ const (
 )
 
 type BankCardTypeModel struct {
-	inputs        []textinput.Model
+	inputs        []*textinput.Model
 	focused       int
 	err           error
 	usecase       UsecaseInterface
 	homeModel     tea.Model
 	typeListModel tea.Model
+
+	nameInput           *textinput.Model
+	numberInput         *textinput.Model
+	expirationDateInput *textinput.Model
+	securityCodeInput   *textinput.Model
 }
 
 func NewBankCardTypeModel(usecase UsecaseInterface) *BankCardTypeModel {
-	inputs := make([]textinput.Model, 4)
+	inputs := make([]*textinput.Model, 4)
 
-	inputs[BankCardTypeNameInputIndex] = textinput.New()
-	inputs[BankCardTypeNameInputIndex].Focus()
+	nameInput := textinput.New()
+	nameInput.Focus()
 
-	inputs[BankCardTypeNumberInputIndex] = textinput.New()
-	inputs[BankCardTypeNumberInputIndex].Placeholder = "4505 **** **** 1234"
-	inputs[BankCardTypeNumberInputIndex].CharLimit = 16
-	inputs[BankCardTypeNumberInputIndex].Width = 16
+	numberInput := textinput.New()
+	numberInput.Placeholder = "4505 **** **** 1234"
+	numberInput.CharLimit = 16
+	numberInput.Width = 16
 
-	inputs[BankCardTypeExpirationDateInputIndex] = textinput.New()
-	inputs[BankCardTypeExpirationDateInputIndex].Placeholder = "10/11"
-	inputs[BankCardTypeExpirationDateInputIndex].CharLimit = 5
-	inputs[BankCardTypeExpirationDateInputIndex].Width = 5
+	expirationDateInput := textinput.New()
+	expirationDateInput.Placeholder = "10/11"
+	expirationDateInput.CharLimit = 5
+	expirationDateInput.Width = 5
 
-	inputs[BankCardTypeSecurityCodeInputIndex] = textinput.New()
-	inputs[BankCardTypeSecurityCodeInputIndex].Placeholder = "123"
-	inputs[BankCardTypeSecurityCodeInputIndex].CharLimit = 3
-	inputs[BankCardTypeSecurityCodeInputIndex].Width = 3
+	securityCodeInput := textinput.New()
+	securityCodeInput.Placeholder = "123"
+	securityCodeInput.CharLimit = 3
+	securityCodeInput.Width = 3
+
+	inputs[BankCardTypeNameInputIndex] = &nameInput
+	inputs[BankCardTypeNumberInputIndex] = &numberInput
+	inputs[BankCardTypeExpirationDateInputIndex] = &expirationDateInput
+	inputs[BankCardTypeSecurityCodeInputIndex] = &securityCodeInput
 
 	return &BankCardTypeModel{
-		inputs:  inputs,
-		usecase: usecase,
+		inputs:              inputs,
+		usecase:             usecase,
+		nameInput:           &nameInput,
+		numberInput:         &numberInput,
+		expirationDateInput: &expirationDateInput,
+		securityCodeInput:   &securityCodeInput,
 	}
 }
 
@@ -65,30 +79,16 @@ func (m BankCardTypeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.KeyEnter:
 			if m.focused == len(m.inputs)-1 {
-				name := m.inputs[BankCardTypeNameInputIndex].Value()
-				number := m.inputs[BankCardTypeNumberInputIndex].Value()
-				expirationDate := m.inputs[BankCardTypeExpirationDateInputIndex].Value()
-				securityCode := m.inputs[BankCardTypeSecurityCodeInputIndex].Value()
+				name := m.nameInput.Value()
+				number := m.numberInput.Value()
+				expirationDate := m.expirationDateInput.Value()
+				securityCode := m.securityCodeInput.Value()
 
 				err := m.usecase.CreateBankCard(ctx, name, number, expirationDate, securityCode)
 
 				if err != nil {
-					m.inputs[BankCardTypeNameInputIndex].Reset()
-					m.inputs[BankCardTypeNameInputIndex].Focus()
-
-					m.inputs[BankCardTypeNumberInputIndex].Reset()
-					m.inputs[BankCardTypeNumberInputIndex].Blur()
-
-					m.inputs[BankCardTypeExpirationDateInputIndex].Reset()
-					m.inputs[BankCardTypeExpirationDateInputIndex].Blur()
-
-					m.inputs[BankCardTypeSecurityCodeInputIndex].Reset()
-					m.inputs[BankCardTypeSecurityCodeInputIndex].Blur()
-
 					m.err = err
-					m.prevInput()
-					m.prevInput()
-					m.prevInput()
+					m.resetInput()
 
 					return m, nil
 				}
@@ -111,14 +111,15 @@ func (m BankCardTypeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.inputs[m.focused].Focus()
 
-	// We handle errors just like any other message
 	case error:
 		m.err = msg
 		return m, nil
 	}
 
+	var newModel textinput.Model
 	for i := range m.inputs {
-		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
+		newModel, cmds[i] = m.inputs[i].Update(msg)
+		*m.inputs[i] = newModel
 	}
 	return m, tea.Batch(cmds...)
 }
@@ -133,10 +134,10 @@ Expiration date:
 Security code:
 %s
 `,
-		m.inputs[BankCardTypeNameInputIndex].View(),
-		m.inputs[BankCardTypeNumberInputIndex].View(),
-		m.inputs[BankCardTypeExpirationDateInputIndex].View(),
-		m.inputs[BankCardTypeSecurityCodeInputIndex].View(),
+		m.nameInput.View(),
+		m.numberInput.View(),
+		m.expirationDateInput.View(),
+		m.securityCodeInput.View(),
 	) + "\n"
 
 	if m.err != nil {
@@ -160,4 +161,15 @@ func (m *BankCardTypeModel) prevInput() {
 	if m.focused < 0 {
 		m.focused = len(m.inputs) - 1
 	}
+}
+
+func (m *BankCardTypeModel) resetInput() {
+	for _, inp := range m.inputs {
+		inp.Reset()
+		inp.Blur()
+	}
+
+	m.nameInput.Focus()
+
+	m.focused = 0
 }
