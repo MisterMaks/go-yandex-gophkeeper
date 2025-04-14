@@ -10,33 +10,7 @@ import (
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/domain"
 )
 
-const (
-	DataSizeLimit = 15 * 1024 * 1024
-
-	CreateUserQuery = `INSERT INTO "user" (login, password_hash, public_key, private_key_cipher) VALUES ($1, $2, $3, $4) RETURNING id;`
-	GetUserQuery    = `SELECT id, login, password_hash, public_key, private_key_cipher FROM "user" WHERE login = $1 AND password_hash = $2;`
-
-	CreateDataQuery   = `INSERT INTO data (user_id, name, type, data) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, name, type) DO NOTHING RETURNING id, created_at, updated_at;`
-	GetDataQuery      = `SELECT name, type, data, created_at, updated_at FROM data WHERE user_id = $1 AND id = $2;`
-	GetDataBatchQuery = `SELECT id, name, type, data, created_at, updated_at FROM data WHERE user_id = $1 ORDER BY updated_at DESC;`
-
-	// UpdateDataQuery update data. But cannot update `size_in_bytes` and `data` fields in "uploading" status
-	UpdateDataQuery = `UPDATE 
-    data 
-SET 
-    name = $1, 
-    type = $2, 
-    data = $3, 
-    updated_at = now(),
-WHERE 
-    user_id = $4 AND 
-    id = $5 
-RETURNING 
-	created_at, 
-	updated_at;`
-
-	DeleteDataQuery = `DELETE FROM data WHERE user_id = $1 AND id = $2 RETURNING name, type, data, created_at, updated_at;`
-)
+const DataSizeLimit = 15 * 1024 * 1024
 
 var (
 	ErrDataTooLarge = errors.New("data too large")
@@ -51,9 +25,11 @@ func NewPostgresStorage(db *sql.DB) *PostgresStorage {
 }
 
 func (ps *PostgresStorage) CreateUser(ctx context.Context, login string, passwordHash, publicKey, privateKeyCipher []byte) (*domain.User, error) {
+	query := `INSERT INTO "user" (login, password_hash, public_key, private_key_cipher) VALUES ($1, $2, $3, $4) RETURNING id;`
+
 	row := ps.db.QueryRowContext(
 		ctx,
-		CreateUserQuery,
+		query,
 		login,
 		passwordHash,
 		publicKey,
@@ -76,9 +52,11 @@ func (ps *PostgresStorage) CreateUser(ctx context.Context, login string, passwor
 }
 
 func (ps *PostgresStorage) AuthUser(ctx context.Context, login string, passwordHash []byte) (*domain.User, error) {
+	query := `SELECT id, login, password_hash, public_key, private_key_cipher FROM "user" WHERE login = $1 AND password_hash = $2;`
+
 	row := ps.db.QueryRowContext(
 		ctx,
-		GetUserQuery,
+		query,
 		login,
 		passwordHash,
 	)
@@ -105,9 +83,11 @@ func (ps *PostgresStorage) CreateData(ctx context.Context, userID, name, dataTyp
 		return nil, err
 	}
 
+	query := `INSERT INTO data (user_id, name, type, data) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, name, type) DO NOTHING RETURNING id, created_at, updated_at;`
+
 	row := ps.db.QueryRowContext(
 		ctx,
-		CreateDataQuery,
+		query,
 		userIDUint,
 		name,
 		dataType,
@@ -143,9 +123,11 @@ func (ps *PostgresStorage) GetData(ctx context.Context, userID, id string) (*dom
 		return nil, err
 	}
 
+	query := `SELECT name, type, data, created_at, updated_at FROM data WHERE user_id = $1 AND id = $2;`
+
 	row := ps.db.QueryRowContext(
 		ctx,
-		GetDataQuery,
+		query,
 		userIDUint,
 		idUint,
 	)
@@ -175,9 +157,11 @@ func (ps *PostgresStorage) GetDataBatch(ctx context.Context, userID string) ([]*
 		return nil, err
 	}
 
+	query := `SELECT id, name, type, data, created_at, updated_at FROM data WHERE user_id = $1 ORDER BY updated_at DESC;`
+
 	rows, err := ps.db.QueryContext(
 		ctx,
-		GetDataBatchQuery,
+		query,
 		userIDUint,
 	)
 	if err != nil {
@@ -238,9 +222,23 @@ func (ps *PostgresStorage) UpdateData(ctx context.Context, userID, id string, na
 		return nil, err
 	}
 
+	query := `UPDATE 
+    data 
+SET 
+    name = $1, 
+    type = $2, 
+    data = $3, 
+    updated_at = now(),
+WHERE 
+    user_id = $4 AND 
+    id = $5 
+RETURNING 
+	created_at, 
+	updated_at;`
+
 	row := ps.db.QueryRowContext(
 		ctx,
-		UpdateDataQuery,
+		query,
 		name,
 		dataType,
 		data,
@@ -278,9 +276,11 @@ func (ps *PostgresStorage) DeleteData(ctx context.Context, userID, id string) (*
 		return nil, err
 	}
 
+	query := `DELETE FROM data WHERE user_id = $1 AND id = $2 RETURNING name, type, data, created_at, updated_at;`
+
 	row := ps.db.QueryRowContext(
 		ctx,
-		DeleteDataQuery,
+		query,
 		userIDUint,
 		idUint,
 	)
