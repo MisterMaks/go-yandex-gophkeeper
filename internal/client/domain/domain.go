@@ -17,22 +17,22 @@ var EncryptedDataTypes = map[string]struct{}{
 	BankCardDataType:      {},
 }
 
-type LoginPassword struct {
+type LoginPasswordType struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
 
-type BankCard struct {
+type BankCardType struct {
 	Number         string    `json:"number"`
 	ExpirationDate time.Time `json:"expiration_date"`
 	SecurityCode   string    `json:"security_code"`
 }
 
-type Text struct {
+type TextType struct {
 	Text string `json:"text"`
 }
 
-type Binary struct {
+type BinaryType struct {
 	Data []byte `json:"data"`
 }
 

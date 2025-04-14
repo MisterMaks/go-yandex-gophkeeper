@@ -178,7 +178,7 @@ func (u *Usecase) DeleteData(ctx context.Context, id string) error {
 }
 
 func (u *Usecase) CreateLoginPassword(ctx context.Context, name, login, password string) error {
-	loginPassword := domain.LoginPassword{
+	loginPassword := domain.LoginPasswordType{
 		Login:    login,
 		Password: password,
 	}
@@ -212,7 +212,7 @@ func (u *Usecase) CreateBankCard(ctx context.Context, name, number, expirationDa
 		return fmt.Errorf("invalid security code")
 	}
 
-	bankCard := domain.BankCard{
+	bankCard := domain.BankCardType{
 		Number:         number,
 		ExpirationDate: expirationDateTime,
 		SecurityCode:   securityCode,
@@ -233,7 +233,7 @@ func (u *Usecase) CreateBankCard(ctx context.Context, name, number, expirationDa
 }
 
 func (u *Usecase) CreateText(ctx context.Context, name, text string) error {
-	t := domain.Text{Text: text}
+	t := domain.TextType{Text: text}
 
 	data, err := json.Marshal(t)
 	if err != nil {
