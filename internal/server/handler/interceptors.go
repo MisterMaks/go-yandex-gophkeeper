@@ -66,3 +66,48 @@ func (h *GRPCHandler) AuthenticateUnaryInterceptor(ctx context.Context, req any,
 
 	return handler(ctx, req)
 }
+
+type wrappedStream struct {
+	grpc.ServerStream
+	userID string
+	ss     grpc.ServerStream
+}
+
+func (w *wrappedStream) Context() context.Context {
+	ctx := w.ss.Context()
+	ctx = context.WithValue(ctx, UserIDKey, w.userID)
+	ctxLogger := logger.GetContextLogger(ctx)
+	ctxLogger = ctxLogger.With(zap.String(string(UserIDKey), w.userID))
+	ctx = context.WithValue(ctx, logger.LoggerKey, ctxLogger)
+
+	return ctx
+}
+
+// AuthenticateStreamInterceptor is stream interceptor for auths user.
+func (h *GRPCHandler) AuthenticateStreamInterceptor(srv any, ss grpc.ServerStream, si *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	if _, ok := h.grpcMethodsForAuthenticateStreamInterceptor[si.FullMethod]; !ok {
+		return handler(srv, ss)
+	}
+
+	var token string
+	if md, ok := metadata.FromIncomingContext(ss.Context()); ok {
+		values := md.Get(AuthorizationHeaderKey)
+		if len(values) > 0 {
+			token = strings.TrimPrefix(values[0], BearerKey)
+		}
+	}
+
+	if len(token) == 0 {
+		return status.Errorf(codes.Unauthenticated, "missing %s metadata", AuthorizationHeaderKey)
+	}
+
+	userID, err := h.getUserID(token)
+
+	if err != nil {
+		return status.Error(codes.Unauthenticated, "invalid token")
+	}
+
+	ws := &wrappedStream{ss, userID, ss}
+
+	return handler(srv, ws)
+}

@@ -16,6 +16,7 @@ type UsecaseInterface interface {
 	CreateBankCard(ctx context.Context, name, number, expirationDate, securityCode string) error
 	CreateText(ctx context.Context, name, text string) error
 	CreateBinary(ctx context.Context, filePath string) error
+	GetChunkedData(ctx context.Context, id string, filePath string) error
 }
 
 type TUI struct {

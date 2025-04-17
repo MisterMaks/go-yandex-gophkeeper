@@ -63,6 +63,7 @@ message GetDataBatchResponse {
     string name = 2;
     Type type = 3;
     bytes data = 5;
+    bool is_chunked = 6;
   }
 
   repeated Data data_batch = 1;

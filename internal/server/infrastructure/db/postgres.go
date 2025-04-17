@@ -178,7 +178,7 @@ func (ps *PostgresStorage) GetData(ctx context.Context, userID, id string) (*dom
 		return nil, err
 	}
 
-	query := `SELECT name, type, data, created_at, updated_at FROM data WHERE user_id = $1 AND id = $2;`
+	query := `SELECT name, type, data, created_at, updated_at, external_id FROM data WHERE user_id = $1 AND id = $2;`
 
 	row := ps.db.QueryRowContext(
 		ctx,
@@ -198,6 +198,7 @@ func (ps *PostgresStorage) GetData(ctx context.Context, userID, id string) (*dom
 		&d.Data,
 		&d.CreatedAt,
 		&d.UpdatedAt,
+		&d.ExternalID,
 	)
 	if err != nil {
 		return nil, err
@@ -212,7 +213,7 @@ func (ps *PostgresStorage) GetDataBatch(ctx context.Context, userID string) ([]*
 		return nil, err
 	}
 
-	query := `SELECT id, name, type, data, created_at, updated_at FROM data WHERE user_id = $1 ORDER BY updated_at DESC;`
+	query := `SELECT id, name, type, data, created_at, updated_at, external_id FROM data WHERE user_id = $1 ORDER BY updated_at DESC;`
 
 	rows, err := ps.db.QueryContext(
 		ctx,
@@ -227,12 +228,13 @@ func (ps *PostgresStorage) GetDataBatch(ctx context.Context, userID string) ([]*
 	dataBatch := []*domain.Data{}
 	for rows.Next() {
 		var (
-			id        uint
-			name      string
-			dataType  string
-			data      []byte
-			createdAt time.Time
-			updatedAt time.Time
+			id         uint
+			name       string
+			dataType   string
+			data       []byte
+			createdAt  time.Time
+			updatedAt  time.Time
+			externalID *string
 		)
 
 		err = rows.Scan(
@@ -242,19 +244,21 @@ func (ps *PostgresStorage) GetDataBatch(ctx context.Context, userID string) ([]*
 			&data,
 			&createdAt,
 			&updatedAt,
+			&externalID,
 		)
 		if err != nil {
 			return nil, err
 		}
 
 		dataBatch = append(dataBatch, &domain.Data{
-			ID:        strconv.Itoa(int(id)),
-			UserID:    userID,
-			Name:      name,
-			Type:      dataType,
-			Data:      data,
-			CreatedAt: createdAt,
-			UpdatedAt: updatedAt,
+			ID:         strconv.Itoa(int(id)),
+			UserID:     userID,
+			Name:       name,
+			Type:       dataType,
+			Data:       data,
+			ExternalID: externalID,
+			CreatedAt:  createdAt,
+			UpdatedAt:  updatedAt,
 		})
 	}
 
@@ -345,7 +349,7 @@ func (ps *PostgresStorage) SetUploaded(
 SET 
     status = 'UPLOADED',
     task_id = null,
-    updated_at = now(),
+    updated_at = now()
 WHERE 
     user_id = $1 AND 
     id = $2 AND 
@@ -389,7 +393,7 @@ func (ps *PostgresStorage) SetDeleting(
 SET 
     status = 'DELETING',
     task_id = nextval('data_task_id_seq'),
-    updated_at = now(),
+    updated_at = now()
 WHERE 
     user_id = $1 AND 
     id = $2 AND 
@@ -475,7 +479,7 @@ func (ps *PostgresStorage) DeleteChunkedData(ctx context.Context, userID, id str
 		return nil, err
 	}
 
-	query := `DELETE FROM data WHERE user_id = $1 AND id = $2 AND status = 'DELETING' AND taskID = $3 RETURNING name, type, data, created_at, updated_at;`
+	query := `DELETE FROM data WHERE user_id = $1 AND id = $2 AND status = 'DELETING' AND task_id = $3 RETURNING name, type, data, created_at, updated_at;`
 
 	row := ps.db.QueryRowContext(
 		ctx,

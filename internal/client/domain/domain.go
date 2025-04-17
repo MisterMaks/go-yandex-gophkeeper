@@ -5,11 +5,13 @@ import (
 )
 
 const (
-	LoginPasswordDataType                = "LOGIN_PASSWORD"
-	BankCardDataType                     = "BANK_CARD"
-	TextDataType                         = "TEXT"
-	BinaryDataType                       = "BINARY"
-	BankCardDataTypeExpirationDateFormat = "01/06"
+	LoginPasswordDataType                     = "LOGIN_PASSWORD"
+	BankCardDataType                          = "BANK_CARD"
+	TextDataType                              = "TEXT"
+	BinaryDataType                            = "BINARY"
+	BankCardDataTypeExpirationDateFormat      = "01/06"
+	ChunkSize                            uint = 100 * 1024
+	DataSizeLimit                             = 15 * 1024 * 1024
 )
 
 var EncryptedDataTypes = map[string]struct{}{
@@ -37,8 +39,9 @@ type BinaryType struct {
 }
 
 type Data struct {
-	ID   string
-	Name string
-	Type string
-	Data []byte
+	ID        string
+	Name      string
+	Type      string
+	Data      []byte
+	IsChunked bool
 }

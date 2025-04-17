@@ -16,10 +16,12 @@ import (
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/logger"
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/usecase"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/minio/minio-go/v7"
+	minio_credentials "github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/pressly/goose/v3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	grpc_credentials "google.golang.org/grpc/credentials"
 )
 
 const (
@@ -102,20 +104,20 @@ func main() {
 
 	postgresStorage := db.NewPostgresStorage(postgresDB)
 
-	//minioClient, err := minio.New(config.MinioEndpoint, &minio.Options{
-	//	Creds: credentials.NewStaticV4(config.MinioAccessKey, config.MinioSecretKey, ""),
-	//})
-	//if err != nil {
-	//	logger.Log.Fatal("Failed to create Minio client",
-	//		zap.Error(err),
-	//	)
-	//}
+	minioClient, err := minio.New(c.MinioEndpoint, &minio.Options{
+		Creds: minio_credentials.NewStaticV4(c.MinioAccessKey, c.MinioSecretKey, ""),
+	})
+	if err != nil {
+		logger.Log.Fatal("Failed to create Minio client",
+			zap.Error(err),
+		)
+	}
 
-	//minioStorage := db.NewMinioStorage(minioClient)
+	minioStorage := db.NewMinioStorage(minioClient)
 
 	u := usecase.NewUsecase(
 		postgresStorage,
-		nil,
+		minioStorage,
 		c.PasswordKey,
 		c.MinLoginLength,
 		c.MinPasswordLength,
@@ -131,9 +133,13 @@ func main() {
 			pb.GoYandexGophkeeper_UpdateData_FullMethodName,
 			pb.GoYandexGophkeeper_DeleteData_FullMethodName,
 		},
+		[]string{
+			pb.GoYandexGophkeeper_CreateChunkedData_FullMethodName,
+			pb.GoYandexGophkeeper_GetChunkedData_FullMethodName,
+		},
 	)
 
-	tlsCert, err := credentials.NewServerTLSFromFile(PathToCertificate, PathToPrivateKey)
+	tlsCert, err := grpc_credentials.NewServerTLSFromFile(PathToCertificate, PathToPrivateKey)
 	if err != nil {
 		logger.Log.Fatal("Failed to get server certificate from file",
 			zap.Error(err),
@@ -145,6 +151,9 @@ func main() {
 		grpc.ChainUnaryInterceptor(
 			logger.RequestLoggerUnaryInterceptor,
 			h.AuthenticateUnaryInterceptor,
+		),
+		grpc.StreamInterceptor(
+			h.AuthenticateStreamInterceptor,
 		),
 	)
 

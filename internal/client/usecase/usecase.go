@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -35,6 +36,8 @@ type GophkeeperClientInterface interface {
 	GetDataBatch(ctx context.Context) (*pb.GetDataBatchResponse, error)
 	UpdateData(ctx context.Context, id, name, dataType string, data []byte) (*pb.UpdateDataResponse, error)
 	DeleteData(ctx context.Context, id string) (*pb.DeleteDataResponse, error)
+	CreateChunkedData(ctx context.Context, name, dataType string, size int64, reader io.Reader) (*pb.CreateChunkedDataResponse, error)
+	GetChunkedData(ctx context.Context, id string, filepath string) error
 }
 
 type Usecase struct {
@@ -162,10 +165,11 @@ func (u *Usecase) GetDataBatch(ctx context.Context) ([]domain.Data, error) {
 		}
 
 		out = append(out, domain.Data{
-			ID:   data.Id,
-			Name: data.Name,
-			Type: dataType.String(),
-			Data: d,
+			ID:        data.Id,
+			Name:      data.Name,
+			Type:      dataType.String(),
+			Data:      d,
+			IsChunked: data.IsChunked,
 		})
 	}
 
@@ -240,6 +244,11 @@ func (u *Usecase) CreateText(ctx context.Context, name, text string) error {
 		return err
 	}
 
+	if len(data) > domain.DataSizeLimit {
+		_, err = u.gophkeeperClient.CreateChunkedData(ctx, name, domain.TextDataType, int64(len(data)), bytes.NewReader(data))
+		return err
+	}
+
 	_, err = u.gophkeeperClient.CreateData(ctx, name, domain.TextDataType, data)
 	return err
 }
@@ -247,11 +256,33 @@ func (u *Usecase) CreateText(ctx context.Context, name, text string) error {
 func (u *Usecase) CreateBinary(ctx context.Context, filePath string) error {
 	name := filepath.Base(filePath)
 
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	filesize := stat.Size()
+
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
 
+	if filesize > domain.DataSizeLimit {
+		_, err = u.gophkeeperClient.CreateChunkedData(ctx, name, domain.BinaryDataType, filesize, file)
+		return err
+	}
+
 	_, err = u.gophkeeperClient.CreateData(ctx, name, domain.BinaryDataType, fileBytes)
 	return err
+}
+
+func (u *Usecase) GetChunkedData(ctx context.Context, id string, filePath string) error {
+	return u.gophkeeperClient.GetChunkedData(ctx, id, filePath)
 }

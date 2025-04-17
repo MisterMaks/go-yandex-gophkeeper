@@ -55,7 +55,8 @@ type GRPCHandler struct {
 	tokenKey string
 	tokenExp time.Duration
 
-	grpcMethodsForAuthenticateUnaryInterceptor map[string]struct{}
+	grpcMethodsForAuthenticateUnaryInterceptor  map[string]struct{}
+	grpcMethodsForAuthenticateStreamInterceptor map[string]struct{}
 }
 
 // NewGRPCHandler creates *GRPCHandler
@@ -64,17 +65,24 @@ func NewGRPCHandler(
 	tokenKey string,
 	tokenExp time.Duration,
 	grpcMethodsForAuthenticateUnaryInterceptorSl []string,
+	grpcMethodsForAuthenticateStreamInterceptorSl []string,
 ) *GRPCHandler {
 	grpcMethodsForAuthenticateUnaryInterceptor := map[string]struct{}{}
 	for _, grpcMethod := range grpcMethodsForAuthenticateUnaryInterceptorSl {
 		grpcMethodsForAuthenticateUnaryInterceptor[grpcMethod] = struct{}{}
 	}
 
+	grpcMethodsForAuthenticateStreamInterceptor := map[string]struct{}{}
+	for _, grpcMethod := range grpcMethodsForAuthenticateStreamInterceptorSl {
+		grpcMethodsForAuthenticateStreamInterceptor[grpcMethod] = struct{}{}
+	}
+
 	return &GRPCHandler{
 		usecase:  usecase,
 		tokenKey: tokenKey,
 		tokenExp: tokenExp,
-		grpcMethodsForAuthenticateUnaryInterceptor: grpcMethodsForAuthenticateUnaryInterceptor,
+		grpcMethodsForAuthenticateUnaryInterceptor:  grpcMethodsForAuthenticateUnaryInterceptor,
+		grpcMethodsForAuthenticateStreamInterceptor: grpcMethodsForAuthenticateStreamInterceptor,
 	}
 }
 
@@ -355,6 +363,12 @@ func (h *GRPCHandler) GetChunkedData(in *pb.GetChunkedDataRequest, stream pb.GoY
 	}
 
 	reader, err := h.usecase.GetChunkedDataReader(ctx, userID, in.Id)
+	if err != nil {
+		handlerLogger.Error("Failed to get chunked data reader",
+			zap.Error(err),
+		)
+		return status.Error(codes.Internal, InternalErrorMessage)
+	}
 
 	for {
 		buffer := make([]byte, ChunkSize)

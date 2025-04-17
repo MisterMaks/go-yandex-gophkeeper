@@ -39,7 +39,7 @@ services:
     entrypoint: |
       bash -c "
         mc alias set go-yandex-gophkeeper http://minio1:9000 go_yandex_gophkeeper_minio_user go_yandex_gophkeeper_minio_password
-        mc mb go-yandex-gophkeeper/go_yandex_gophkeeper_bucket
+        mc mb go-yandex-gophkeeper/go-yandex-gophkeeper-bucket
       "
   go-yandex-gophkeeper-server:
     build:
@@ -55,7 +55,7 @@ services:
       MINIO_ENDPOINT: minio1:9000
       MINIO_ACCESS_KEY: go_yandex_gophkeeper_minio_user
       MINIO_SECRET_KEY: go_yandex_gophkeeper_minio_password
-      MINIO_BUCKET_NAME: go_yandex_gophkeeper_bucket
+      MINIO_BUCKET_NAME: go-yandex-gophkeeper-bucket
     ports:
       - 8080:8080
     depends_on:

@@ -2,8 +2,11 @@ package client
 
 import (
 	"context"
+	"io"
+	"os"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
+	"github.com/MisterMaks/go-yandex-gophkeeper/internal/client/domain"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -105,4 +108,78 @@ func (c *GophkeeperClient) DeleteData(ctx context.Context, id string) (*pb.Delet
 
 func (c *GophkeeperClient) getAuthCtx(ctx context.Context) context.Context {
 	return metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", "Bearer "+c.accessToken))
+}
+
+func (c *GophkeeperClient) CreateChunkedData(
+	ctx context.Context,
+	name, dataType string,
+	size int64,
+	reader io.Reader,
+) (*pb.CreateChunkedDataResponse, error) {
+	ctx = c.getAuthCtx(ctx)
+
+	in := &pb.CreateChunkedDataRequest{
+		MetaData: &pb.CreateChunkedDataRequest_MetaData{
+			Name:        name,
+			Type:        pb.Type(pb.Type_value[dataType]),
+			SizeInBytes: size,
+		},
+	}
+
+	stream, err := c.client.CreateChunkedData(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		chunk := make([]byte, domain.ChunkSize)
+		n, err := reader.Read(chunk)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		in.DataChunk = chunk[:n]
+
+		err = stream.Send(in)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	out, err := stream.CloseAndRecv()
+	return out, err
+}
+
+func (c *GophkeeperClient) GetChunkedData(ctx context.Context, id string, filepath string) error {
+	ctx = c.getAuthCtx(ctx)
+
+	file, err := os.Create("./" + filepath)
+
+	in := &pb.GetChunkedDataRequest{Id: id}
+
+	stream, err := c.client.GetChunkedData(ctx, in)
+	if err != nil {
+		return err
+	}
+
+	for {
+		out, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		chunk := out.GetDataChunk()
+		_, err = file.Write(chunk)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

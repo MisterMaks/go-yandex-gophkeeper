@@ -210,30 +210,25 @@ func (u *Usecase) UpdateData(ctx context.Context, userID string, id string, name
 // DeleteData deletes data.
 func (u *Usecase) DeleteData(ctx context.Context, userID string, id string) (*domain.Data, error) {
 	d, err := u.postgresStorage.DeleteData(ctx, userID, id)
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
-		switch {
-		case pgErr.Code == pgerrcode.NoData:
-			d, err = u.postgresStorage.SetDeleting(ctx, userID, id)
-			if err != nil {
-				return nil, err
-			}
 
-			err = u.minioStorage.RemoveObject(ctx, *d.ExternalID)
-			if err != nil {
-				return nil, err
-			}
+	if errors.Is(err, sql.ErrNoRows) {
+		d, err = u.postgresStorage.SetDeleting(ctx, userID, id)
+		if err != nil {
+			return nil, err
+		}
 
-			d, err = u.postgresStorage.DeleteChunkedData(ctx, userID, id, *d.TaskID)
-			if err != nil {
-				return nil, err
-			}
-		default:
+		err = u.minioStorage.RemoveObject(ctx, *d.ExternalID)
+		if err != nil {
+			return nil, err
+		}
+
+		d, err = u.postgresStorage.DeleteChunkedData(ctx, userID, id, *d.TaskID)
+		if err != nil {
 			return nil, err
 		}
 	}
 
-	return d, nil
+	return d, err
 }
 
 // CreateChunkedData creates chunked data
@@ -243,7 +238,7 @@ func (u *Usecase) CreateChunkedData(ctx context.Context, userID string, chunkedD
 		return nil, err
 	}
 
-	_, err = u.minioStorage.PutObject(ctx, data.ID, chunkedData, chunkedData.SizeInBytes)
+	_, err = u.minioStorage.PutObject(ctx, userID+"_"+chunkedData.Type+"_"+chunkedData.Name, chunkedData, chunkedData.SizeInBytes)
 	if err != nil {
 		return nil, err
 	}

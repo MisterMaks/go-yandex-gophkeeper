@@ -7,16 +7,6 @@ import (
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
 )
 
-// Status is status type.
-type Status string
-
-// Uploading statuses.
-const (
-	StatusUploaded  Status = "UPLOADED"
-	StatusUploading Status = "UPLOADING"
-	StatusDeleting  Status = "DELETING"
-)
-
 // Server errors.
 var (
 	ErrLoginTaken                    = errors.New("login already taken")
@@ -50,11 +40,16 @@ type Data struct {
 // SerializeToProtobuf serializes data to protobuf format.
 func (d Data) SerializeToProtobuf() *pb.GetDataBatchResponse_Data {
 	return &pb.GetDataBatchResponse_Data{
-		Id:   d.ID,
-		Name: d.Name,
-		Type: pb.Type(pb.Type_value[d.Type]),
-		Data: d.Data,
+		Id:        d.ID,
+		Name:      d.Name,
+		Type:      pb.Type(pb.Type_value[d.Type]),
+		Data:      d.Data,
+		IsChunked: d.IsChunked(),
 	}
+}
+
+func (d Data) IsChunked() bool {
+	return d.ExternalID != nil
 }
 
 // StreamInterface contains needed funcs for saving chunked data.
@@ -96,7 +91,7 @@ func NewChunkedDataFromStream(stream pb.GoYandexGophkeeper_CreateChunkedDataServ
 	}
 
 	name := chunk.GetMetaData().GetName()
-	dataType := chunk.GetMetaData().GetType()
+	dataType := chunk.GetMetaData().GetType().String()
 	size := chunk.GetMetaData().GetSizeInBytes()
 	buffer := chunk.GetDataChunk()
 

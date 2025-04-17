@@ -73,7 +73,14 @@ func (m *HomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.cursor = 0
 		case "enter":
 			data := m.dataBatch[m.cursor]
-			if data.Type == domain.BinaryDataType {
+			switch {
+			case data.IsChunked:
+				err := m.usecase.GetChunkedData(context.Background(), data.ID, "./"+data.Name)
+				if err != nil {
+					m.err = err
+					break
+				}
+			case data.Type == domain.BinaryDataType:
 				file, err := os.Create("./" + data.Name)
 				if err != nil {
 					m.err = err
