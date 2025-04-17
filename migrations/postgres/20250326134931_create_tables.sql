@@ -10,16 +10,23 @@ CREATE TABLE "user" (
     updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
+CREATE SEQUENCE data_task_id_seq;
+
 CREATE TABLE data (
     id serial PRIMARY KEY,
     user_id integer NOT NULL REFERENCES "user"(id),
     name varchar(64) NOT NULL,
     type varchar(64) NOT NULL CHECK (type IN ('LOGIN_PASSWORD', 'BANK_CARD', 'TEXT', 'BINARY')),
+    status varchar(64) NOT NULL DEFAULT 'UPLOADED' CHECK (status IN ('UPLOADING', 'UPLOADED', 'DELETING')),
+    task_id integer UNIQUE DEFAULT NULL,
+    external_id varchar(128) UNIQUE DEFAULT NULL,
     data bytea,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     updated_at timestamp with time zone NOT NULL DEFAULT now(),
     UNIQUE (user_id, name, type)  -- unique name for type and user
 );
+
+ALTER SEQUENCE data_task_id_seq OWNED BY data.task_id;
 
 CREATE INDEX name_index ON data (name);
 CREATE INDEX type_index ON data (type);

@@ -73,7 +73,11 @@ func (ps *PostgresStorage) AuthUser(ctx context.Context, login string, passwordH
 	return user, nil
 }
 
-func (ps *PostgresStorage) CreateData(ctx context.Context, userID, name, dataType string, data []byte) (*domain.Data, error) {
+func (ps *PostgresStorage) CreateData(
+	ctx context.Context,
+	userID, name, dataType string,
+	data []byte,
+) (*domain.Data, error) {
 	if len(data) > DataSizeLimit {
 		return nil, ErrDataTooLarge
 	}
@@ -109,6 +113,51 @@ RETURNING id, created_at, updated_at;`
 	}
 
 	err = row.Scan(&id, &d.CreatedAt, &d.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	d.ID = strconv.Itoa(int(id))
+
+	return d, nil
+}
+
+func (ps *PostgresStorage) CreateChunkedData(
+	ctx context.Context,
+	userID, name, dataType string,
+	externalID string,
+) (*domain.Data, error) {
+	userIDUint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `INSERT INTO data (user_id, name, type, status, data, task_id, external_id) 
+VALUES ($1, $2, $3, 'UPLOADING', null, nextval('data_task_id_seq'), $4) 
+ON CONFLICT (user_id, name, type) 
+DO UPDATE SET
+	data = EXCLUDED.data,
+	updated_at = NOW()
+RETURNING id, created_at, updated_at, task_id;`
+
+	row := ps.db.QueryRowContext(
+		ctx,
+		query,
+		userIDUint,
+		name,
+		dataType,
+		externalID,
+	)
+
+	var id uint
+	d := &domain.Data{
+		UserID: userID,
+		Name:   name,
+		Type:   dataType,
+		Data:   nil,
+	}
+
+	err = row.Scan(&id, &d.CreatedAt, &d.UpdatedAt, &d.TaskID)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +266,11 @@ func (ps *PostgresStorage) GetDataBatch(ctx context.Context, userID string) ([]*
 	return dataBatch, nil
 }
 
-func (ps *PostgresStorage) UpdateData(ctx context.Context, userID, id string, name, dataType string, data []byte) (*domain.Data, error) {
+func (ps *PostgresStorage) UpdateData(
+	ctx context.Context,
+	userID, id, name, dataType string,
+	data []byte,
+) (*domain.Data, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return nil, err
@@ -237,7 +290,8 @@ SET
     updated_at = now(),
 WHERE 
     user_id = $4 AND 
-    id = $5 
+    id = $5 AND 
+    status = 'UPLOADED'
 RETURNING 
 	created_at, 
 	updated_at;`
@@ -271,6 +325,106 @@ RETURNING
 	return d, nil
 }
 
+func (ps *PostgresStorage) SetUploaded(
+	ctx context.Context,
+	userID, id string,
+	taskID int64,
+) (time.Time, error) {
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	userIDUint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	query := `UPDATE 
+    data 
+SET 
+    status = 'UPLOADED',
+    task_id = null,
+    updated_at = now(),
+WHERE 
+    user_id = $1 AND 
+    id = $2 AND 
+    task_id = $3 AND 
+    status = 'UPLOADING'
+RETURNING updated_at;`
+
+	row := ps.db.QueryRowContext(
+		ctx,
+		query,
+		userIDUint,
+		idUint,
+		taskID,
+	)
+
+	var updatedAt time.Time
+	err = row.Scan(&updatedAt)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return updatedAt, nil
+}
+
+func (ps *PostgresStorage) SetDeleting(
+	ctx context.Context,
+	userID, id string,
+) (*domain.Data, error) {
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	userIDUint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `UPDATE 
+    data 
+SET 
+    status = 'DELETING',
+    task_id = nextval('data_task_id_seq'),
+    updated_at = now(),
+WHERE 
+    user_id = $1 AND 
+    id = $2 AND 
+    status = 'UPLOADED'
+RETURNING name, type, data, created_at, updated_at, external_id, task_id;`
+
+	row := ps.db.QueryRowContext(
+		ctx,
+		query,
+		userIDUint,
+		idUint,
+	)
+
+	d := &domain.Data{
+		ID:     id,
+		UserID: userID,
+	}
+
+	err = row.Scan(
+		&d.Name,
+		&d.Type,
+		&d.Data,
+		&d.CreatedAt,
+		&d.UpdatedAt,
+		&d.ExternalID,
+		&d.TaskID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return d, nil
+}
+
 func (ps *PostgresStorage) DeleteData(ctx context.Context, userID, id string) (*domain.Data, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -282,13 +436,53 @@ func (ps *PostgresStorage) DeleteData(ctx context.Context, userID, id string) (*
 		return nil, err
 	}
 
-	query := `DELETE FROM data WHERE user_id = $1 AND id = $2 RETURNING name, type, data, created_at, updated_at;`
+	query := `DELETE FROM data WHERE user_id = $1 AND id = $2 AND status = 'UPLOADED' AND external_id = null RETURNING name, type, data, created_at, updated_at;`
 
 	row := ps.db.QueryRowContext(
 		ctx,
 		query,
 		userIDUint,
 		idUint,
+	)
+
+	d := &domain.Data{
+		ID:     id,
+		UserID: userID,
+	}
+
+	err = row.Scan(
+		&d.Name,
+		&d.Type,
+		&d.Data,
+		&d.CreatedAt,
+		&d.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return d, nil
+}
+
+func (ps *PostgresStorage) DeleteChunkedData(ctx context.Context, userID, id string, taskID int64) (*domain.Data, error) {
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	userIDUint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `DELETE FROM data WHERE user_id = $1 AND id = $2 AND status = 'DELETING' AND taskID = $3 RETURNING name, type, data, created_at, updated_at;`
+
+	row := ps.db.QueryRowContext(
+		ctx,
+		query,
+		userIDUint,
+		idUint,
+		taskID,
 	)
 
 	d := &domain.Data{

@@ -12,9 +12,8 @@ service GoYandexGophkeeper {
   rpc GetDataBatch(GetDataBatchRequest) returns (GetDataBatchResponse);
   rpc UpdateData(UpdateDataRequest) returns (UpdateDataResponse);
   rpc DeleteData(DeleteDataRequest) returns (DeleteDataResponse);
-//  rpc CreateChunkedData(stream CreateChunkedDataRequest) returns (CreateChunkedDataResponse);
-//  rpc GetChunkedData(GetChunkedDataRequest) returns (stream GetChunkedDataResponse);
-//  rpc UpdateChunkedData(stream UpdateChunkedDataRequest) returns (UpdateChunkedDataResponse);
+  rpc CreateChunkedData(stream CreateChunkedDataRequest) returns (CreateChunkedDataResponse);
+  rpc GetChunkedData(GetChunkedDataRequest) returns (stream GetChunkedDataResponse);
 }
 
 message RegisterRequest {
@@ -89,7 +88,6 @@ message CreateChunkedDataRequest {
     string name = 1;
     Type type = 2;
     int64 size_in_bytes = 3;
-    bytes data = 4;
   }
 
   optional MetaData meta_data = 1;
@@ -107,18 +105,3 @@ message GetChunkedDataRequest {
 message GetChunkedDataResponse {
   bytes data_chunk = 1;
 }
-
-message UpdateChunkedDataRequest {
-  message MetaData {
-    string id = 1;
-    string name = 2;
-    Type type = 3;
-    int64 size_in_bytes = 4;
-    bytes data = 5;
-  }
-
-  optional MetaData meta_data = 1;
-  bytes data_chunk = 2;
-}
-
-message UpdateChunkedDataResponse {}

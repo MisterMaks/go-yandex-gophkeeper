@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"time"
 
 	pb "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service"
@@ -41,9 +42,8 @@ type UsecaseInterface interface {
 	UpdateData(ctx context.Context, userID string, id string, name string, dataType string, data []byte) (*domain.Data, error)
 	DeleteData(ctx context.Context, userID string, id string) (*domain.Data, error)
 
-	//CreateChunkedData(userID string, stream pb.GoYandexGophkeeper_CreateChunkedDataServer) (*domain.Data, error)
-	//GetChunkedDataReader(ctx context.Context, userID string, id string) (io.Reader, error)
-	//UpdateChunkedData(userID string, stream pb.GoYandexGophkeeper_UpdateChunkedDataServer) (*domain.Data, error)
+	CreateChunkedData(ctx context.Context, userID string, chunkedData *domain.ChunkedData) (*domain.Data, error)
+	GetChunkedDataReader(ctx context.Context, userID string, id string) (io.Reader, error)
 }
 
 // GRPCHandler handlers struct.
@@ -305,100 +305,78 @@ func (h *GRPCHandler) DeleteData(ctx context.Context, in *pb.DeleteDataRequest) 
 }
 
 // CreateChunkedData creates chunked data.
-//func (h *GRPCHandler) CreateChunkedData(stream pb.GoYandexGophkeeper_CreateChunkedDataServer) error {
-//	ctx := stream.Context()
-//
-//	handlerLogger := logger.GetContextLogger(ctx)
-//
-//	handlerLogger.Info("Create data chunk")
-//
-//	userID, err := getContextUserID(ctx)
-//	if err != nil {
-//		handlerLogger.Warn(NoUserIDLogMessage,
-//			zap.Error(err),
-//		)
-//		return status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-//	}
-//
-//	metaData, err := h.usecase.CreateChunkedData(userID, stream)
-//	if err != nil {
-//		handlerLogger.Error("Failed to create chunked data",
-//			zap.Error(err),
-//		)
-//
-//		return status.Error(codes.Internal, InternalErrorMessage)
-//	}
-//
-//	return stream.SendAndClose(&pb.CreateChunkedDataResponse{Id: metaData.ID})
-//}
+func (h *GRPCHandler) CreateChunkedData(stream pb.GoYandexGophkeeper_CreateChunkedDataServer) error {
+	ctx := stream.Context()
+
+	handlerLogger := logger.GetContextLogger(ctx)
+
+	handlerLogger.Info("Create data chunk")
+
+	userID, err := getContextUserID(ctx)
+	if err != nil {
+		handlerLogger.Warn(NoUserIDLogMessage,
+			zap.Error(err),
+		)
+		return status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
+	}
+
+	chunkedData, err := domain.NewChunkedDataFromStream(stream)
+
+	metaData, err := h.usecase.CreateChunkedData(
+		ctx,
+		userID,
+		chunkedData,
+	)
+	if err != nil {
+		handlerLogger.Error("Failed to create chunked data",
+			zap.Error(err),
+		)
+
+		return status.Error(codes.Internal, InternalErrorMessage)
+	}
+
+	return stream.SendAndClose(&pb.CreateChunkedDataResponse{Id: metaData.ID})
+}
 
 // GetChunkedData gets data chunk.
-//func (h *GRPCHandler) GetChunkedData(in *pb.GetDataChunkRequest, stream pb.GoYandexGophkeeper_GetChunkedDataServer) error {
-//	ctx := stream.Context()
-//
-//	handlerLogger := logger.GetContextLogger(ctx)
-//
-//	handlerLogger.Info("Get data chunk")
-//
-//	userID, err := getContextUserID(ctx)
-//	if err != nil {
-//		handlerLogger.Warn(NoUserIDLogMessage,
-//			zap.Error(err),
-//		)
-//		return status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-//	}
-//
-//	reader, err := h.usecase.GetChunkedDataReader(ctx, userID, in.Id)
-//
-//	for {
-//		buffer := make([]byte, ChunkSize)
-//
-//		n, err := reader.Read(buffer)
-//		if err == io.EOF {
-//			return nil
-//		}
-//
-//		if err != nil {
-//			handlerLogger.Error("Failed to get data",
-//				zap.Error(err),
-//			)
-//			return status.Error(codes.Internal, InternalErrorMessage)
-//		}
-//
-//		err = stream.Send(&pb.GetDataChunkResponse{DataChunk: buffer[:n]})
-//		if err != nil {
-//			handlerLogger.Error("Failed to send data chunk in stream",
-//				zap.Error(err),
-//			)
-//			return status.Error(codes.Internal, InternalErrorMessage)
-//		}
-//	}
-//}
+func (h *GRPCHandler) GetChunkedData(in *pb.GetChunkedDataRequest, stream pb.GoYandexGophkeeper_GetChunkedDataServer) error {
+	ctx := stream.Context()
 
-// UpdateChunkedData updates data chunk.
-//func (h *GRPCHandler) UpdateChunkedData(stream pb.GoYandexGophkeeper_UpdateChunkedDataServer) error {
-//	ctx := stream.Context()
-//
-//	handlerLogger := logger.GetContextLogger(ctx)
-//
-//	handlerLogger.Info("Update data chunk")
-//
-//	userID, err := getContextUserID(ctx)
-//	if err != nil {
-//		handlerLogger.Warn(NoUserIDLogMessage,
-//			zap.Error(err),
-//		)
-//		return status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
-//	}
-//
-//	_, err = h.usecase.UpdateChunkedData(userID, stream)
-//	if err != nil {
-//		handlerLogger.Error("Failed to update chunked data",
-//			zap.Error(err),
-//		)
-//
-//		return status.Error(codes.Internal, InternalErrorMessage)
-//	}
-//
-//	return stream.SendAndClose(&pb.UpdateChunkedDataResponse{})
-//}
+	handlerLogger := logger.GetContextLogger(ctx)
+
+	handlerLogger.Info("Get data chunk")
+
+	userID, err := getContextUserID(ctx)
+	if err != nil {
+		handlerLogger.Warn(NoUserIDLogMessage,
+			zap.Error(err),
+		)
+		return status.Error(codes.Unauthenticated, UserUnauthorizedMessage)
+	}
+
+	reader, err := h.usecase.GetChunkedDataReader(ctx, userID, in.Id)
+
+	for {
+		buffer := make([]byte, ChunkSize)
+
+		n, err := reader.Read(buffer)
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			handlerLogger.Error("Failed to get data",
+				zap.Error(err),
+			)
+			return status.Error(codes.Internal, InternalErrorMessage)
+		}
+
+		err = stream.Send(&pb.GetChunkedDataResponse{DataChunk: buffer[:n]})
+		if err != nil {
+			handlerLogger.Error("Failed to send data chunk in stream",
+				zap.Error(err),
+			)
+			return status.Error(codes.Internal, InternalErrorMessage)
+		}
+	}
+}

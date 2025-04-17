@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"regexp"
+	"time"
 
 	"github.com/MisterMaks/go-yandex-gophkeeper/internal/server/domain"
 	"github.com/jackc/pgerrcode"
@@ -49,6 +50,26 @@ type PostgresStorageInterface interface {
 	DeleteData(
 		ctx context.Context,
 		userID, id string,
+	) (*domain.Data, error)
+
+	CreateChunkedData(
+		ctx context.Context,
+		userID, name, dataType string,
+		externalID string,
+	) (*domain.Data, error)
+	SetUploaded(
+		ctx context.Context,
+		userID, id string,
+		taskID int64,
+	) (time.Time, error)
+	SetDeleting(
+		ctx context.Context,
+		userID, id string,
+	) (*domain.Data, error)
+	DeleteChunkedData(
+		ctx context.Context,
+		userID, id string,
+		taskID int64,
 	) (*domain.Data, error)
 }
 
@@ -196,41 +217,40 @@ func (u *Usecase) DeleteData(ctx context.Context, userID string, id string) (*do
 	return d, nil
 }
 
-//// CreateChunkedData creates chunked data
-//func (u *Usecase) CreateChunkedData(ctx context.Context, userID string, id string, dataChunkBuffer *domain.ChunkedData) error {
-//	data, err := u.postgresStorage.GetData(ctx, userID, id)
-//	if err != nil {
-//		return err
-//	}
-//
-//	info, err := u.minioStorage.PutObject(ctx, id, dataChunkBuffer, int64(data.SizeInBytes))
-//	if err != nil {
-//		return err
-//	}
-//
-//	_, err = u.postgresStorage.CreateData(
-//		ctx,
-//		userID,
-//		data.Name,
-//		data.Type,
-//		info.Size,
-//		data.Data,
-//		&id,
-//	)
-//
-//	if err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}
-//
-//// GetDataChunkReader gets chunked data.
-//func (u *Usecase) GetDataChunkReader(ctx context.Context, userID string, id string) (io.Reader, error) {
-//	d, err := u.postgresStorage.GetData(ctx, userID, id)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return u.minioStorage.GetObject(ctx, d.ID)
-//}
+// CreateChunkedData creates chunked data
+func (u *Usecase) CreateChunkedData(ctx context.Context, userID string, chunkedData *domain.ChunkedData) (*domain.Data, error) {
+	data, err := u.postgresStorage.CreateChunkedData(ctx, userID, chunkedData.Name, chunkedData.Type, userID+"_"+chunkedData.Type+"_"+chunkedData.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = u.minioStorage.PutObject(ctx, data.ID, chunkedData, chunkedData.SizeInBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAt, err := u.postgresStorage.SetUploaded(
+		ctx,
+		userID,
+		data.ID,
+		*data.TaskID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	data.UpdatedAt = updatedAt
+
+	return data, nil
+}
+
+// GetChunkedDataReader gets chunked data reader.
+func (u *Usecase) GetChunkedDataReader(ctx context.Context, userID string, id string) (io.Reader, error) {
+	d, err := u.postgresStorage.GetData(ctx, userID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.minioStorage.GetObject(ctx, d.ID)
+}
