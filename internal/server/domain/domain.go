@@ -42,7 +42,7 @@ type Data struct {
 	Type       string
 	Data       []byte
 	TaskID     *int64
-	ExternalID *int64
+	ExternalID *string
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

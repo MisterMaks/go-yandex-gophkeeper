@@ -210,8 +210,27 @@ func (u *Usecase) UpdateData(ctx context.Context, userID string, id string, name
 // DeleteData deletes data.
 func (u *Usecase) DeleteData(ctx context.Context, userID string, id string) (*domain.Data, error) {
 	d, err := u.postgresStorage.DeleteData(ctx, userID, id)
-	if err != nil {
-		return nil, err
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		switch {
+		case pgErr.Code == pgerrcode.NoData:
+			d, err = u.postgresStorage.SetDeleting(ctx, userID, id)
+			if err != nil {
+				return nil, err
+			}
+
+			err = u.minioStorage.RemoveObject(ctx, *d.ExternalID)
+			if err != nil {
+				return nil, err
+			}
+
+			d, err = u.postgresStorage.DeleteChunkedData(ctx, userID, id, *d.TaskID)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			return nil, err
+		}
 	}
 
 	return d, nil
@@ -252,5 +271,5 @@ func (u *Usecase) GetChunkedDataReader(ctx context.Context, userID string, id st
 		return nil, err
 	}
 
-	return u.minioStorage.GetObject(ctx, d.ID)
+	return u.minioStorage.GetObject(ctx, *d.ExternalID)
 }
