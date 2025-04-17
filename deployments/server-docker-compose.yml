@@ -1,0 +1,63 @@
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:latest
+  command: server --console-address ":9090" /mnt/data
+  ports:
+    - "9000:9000"
+    - "9090:9090"
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+services:
+  postgres:
+    image: postgres:15.7-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=go_yandex_gophkeeper_db_password
+      - POSTGRES_USER=go_yandex_gophkeeper_db_user
+      - POSTGRES_DB=go_yandex_gophkeeper_db_name
+  minio1:
+    <<: *minio-common
+    hostname: minio1
+    environment:
+      - MINIO_ROOT_USER=go_yandex_gophkeeper_minio_user
+      - MINIO_ROOT_PASSWORD=go_yandex_gophkeeper_minio_password
+    volumes:
+      - type: bind
+        source: ./volumes/mnt/data/compose
+        target: /mnt/data
+      - type: bind
+        source: ./volumes/etc/default/minio
+        target: /etc/config.env
+  minio1-create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio1
+    entrypoint: |
+      bash -c "
+        mc alias set go-yandex-gophkeeper http://minio1:9000 go_yandex_gophkeeper_minio_user go_yandex_gophkeeper_minio_password
+        mc mb go-yandex-gophkeeper/go-yandex-gophkeeper-bucket
+      "
+  go-yandex-gophkeeper-server:
+    build:
+      context: ../.
+      dockerfile: build/server.Dockerfile
+    environment:
+      GRPC_ADDRESS: ":8080"
+      LOG_LEVEL: "debug"
+      POSTGRES_DSN: "host=postgres user=go_yandex_gophkeeper_db_user password=go_yandex_gophkeeper_db_password dbname=go_yandex_gophkeeper_db_name port=5432"
+      PASSWORD_KEY: "a2d3c0ac2cd00c629246b01c6407a535"
+      TOKEN_KEY: "a2d3c0ac2cd00c629246b01c6407a535"
+      TOKEN_EXPIRATION: "10m"
+      MINIO_ENDPOINT: minio1:9000
+      MINIO_ACCESS_KEY: go_yandex_gophkeeper_minio_user
+      MINIO_SECRET_KEY: go_yandex_gophkeeper_minio_password
+      MINIO_BUCKET_NAME: go-yandex-gophkeeper-bucket
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+      - minio1-create-bucket

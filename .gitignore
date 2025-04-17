@@ -1,0 +1,16 @@
+# IDEs directories
+.idea
+.vscode
+
+.DS_Store
+
+*.out
+
+*local_config.json
+api/kreya
+
+deployments/volumes/
+
+bin/
+
+cmd/certcreator

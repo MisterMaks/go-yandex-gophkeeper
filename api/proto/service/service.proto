@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package service;
+
+option go_package = "github.com/MisterMaks/go-yandex-gophkeeper/api/proto/service";
+
+service GoYandexGophkeeper {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  rpc CreateData(CreateDataRequest) returns (CreateDataResponse);
+  rpc GetDataBatch(GetDataBatchRequest) returns (GetDataBatchResponse);
+  rpc UpdateData(UpdateDataRequest) returns (UpdateDataResponse);
+  rpc DeleteData(DeleteDataRequest) returns (DeleteDataResponse);
+  rpc CreateChunkedData(stream CreateChunkedDataRequest) returns (CreateChunkedDataResponse);
+  rpc GetChunkedData(GetChunkedDataRequest) returns (stream GetChunkedDataResponse);
+}
+
+message RegisterRequest {
+  string login = 1;
+  string password = 2;
+  bytes public_key = 3;
+  bytes private_key_cipher = 4;
+}
+
+message RegisterResponse {
+  string access_token = 1;
+}
+
+message LoginRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  bytes public_key = 1;
+  bytes private_key_cipher = 2;
+  string access_token = 3;
+}
+
+enum Type {
+  LOGIN_PASSWORD = 0;
+  BANK_CARD = 1;
+  TEXT = 2;
+  BINARY = 3;
+}
+
+message CreateDataRequest {
+  string name = 1;
+  Type type = 2;
+  bytes data = 4;
+}
+
+message CreateDataResponse {
+  string id = 1;
+}
+
+message GetDataBatchRequest {}
+
+message GetDataBatchResponse {
+  message Data {
+    string id = 1;
+    string name = 2;
+    Type type = 3;
+    bytes data = 5;
+    bool is_chunked = 6;
+  }
+
+  repeated Data data_batch = 1;
+}
+
+message UpdateDataRequest {
+  string id = 1;
+  string name = 2;
+  Type type = 3;
+  bytes data = 5;
+}
+
+message UpdateDataResponse {}
+
+message DeleteDataRequest {
+  string id = 1;
+}
+
+message DeleteDataResponse {}
+
+message CreateChunkedDataRequest {
+  message MetaData {
+    string name = 1;
+    Type type = 2;
+    int64 size_in_bytes = 3;
+  }
+
+  optional MetaData meta_data = 1;
+  bytes data_chunk = 2;
+}
+
+message CreateChunkedDataResponse {
+  string id = 1;
+}
+
+message GetChunkedDataRequest {
+  string id = 1;
+}
+
+message GetChunkedDataResponse {
+  bytes data_chunk = 1;
+}
